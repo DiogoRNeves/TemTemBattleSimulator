@@ -12,7 +12,7 @@ class TechniqueSet(ABC):
             len(techniques_set) <= max_set_size
         ), f"Too many techniques: {len(techniques_set)=} {max_set_size=}"
         assert (
-            len(techniques_set) > 1
+            len(techniques_set) > 0
         ), f"Must pass in at least one technique: {len(techniques_set)=} {techniques_set=}"
         self.__MAX_SET_SIZE: Final[int] = max_set_size
         self._techniques: list[Technique] = [Technique(t) for t in techniques_set]
