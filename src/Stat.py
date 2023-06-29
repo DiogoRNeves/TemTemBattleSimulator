@@ -3,8 +3,8 @@ from __future__ import annotations
 from enum import Enum, auto
 from math import floor
 
-import TemTemConstants
-from JsonTypedDict import TemTemStatsJson
+from . import TemTemConstants 
+from .JsonTypedDict import TemTemStatsJson
 
 
 class StatValueType(Enum):
@@ -62,7 +62,7 @@ class Stat(Enum):
         Returns:
             A dictionary of Stat values and their initial values.
         """
-        return {i: temtem[i.name.lower()] for i in cls}
+        return {i: temtem[str(i.name.lower())] for i in cls}
 
     @classmethod
     def initializer_dict_from_list(cls, values: list[int]) -> dict[Stat, int]:

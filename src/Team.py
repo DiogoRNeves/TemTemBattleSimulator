@@ -1,7 +1,7 @@
 from abc import ABC
-from typing import Final, Iterable
-from Tem import Tem
-import TemTemConstants
+from typing import Final, Iterable, TypeVar
+from .Tem import Tem
+from . import TemTemConstants
 from icecream import ic
 
 
@@ -96,6 +96,8 @@ class Team(ABC):
     def __repr__(self):
         return [f"level {t.level} {t.display_name} with techs: {[tech.name for tech in t.battle_techniques]}" for t in self].__repr__()
 
+
+TTeam = TypeVar('TTeam', bound=Team)
 
 class CompetitiveTeam(Team):
     """A class representing a team used in a competitive battle"""

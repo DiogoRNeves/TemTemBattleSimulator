@@ -5,10 +5,10 @@ from abc import ABC
 from typing import Callable, Type, final
 
 from typing_extensions import NotRequired, TypedDict
-from TechniqueSet import BattleTechniques, LearnableTechniques
+from .TechniqueSet import BattleTechniques, LearnableTechniques
 
-import TemTemConstants
-from Stats import (
+from . import TemTemConstants
+from .Stats import (
     CompetitiveStats,
     RandomEncounterStats,
     RandomStats,
@@ -18,9 +18,9 @@ from Stats import (
     SvsInitializer,
     TvsInitializer,
 )
-from Technique import Technique, TechniqueClass
-from Tempedia import Tempedia
-from TemTemType import TemTemType, TemType
+from .Technique import Technique, TechniqueClass
+from .Tempedia import Tempedia
+from .TemTemType import TemTemType, TemType
 
 
 class TemSpeciesArg(TypedDict):
@@ -499,7 +499,7 @@ if __name__ == "__main__":
     t_enc = Tem.from_random_encounter(id=random.randint(1, n))
     t_rand = Tem.from_random_stats(id=random.randint(1, n))
     t_comp = Tem.from_competitive(
-        id=Tempedia.get_id_from_name("platimous"),
+        id=Tempedia.get_id_from_name("hedgine"),
         tvs=TvsInitializer({Stat.SPD: 500, Stat.SPATK: 500}),
     )
     koish = Tem.from_random_encounter(id=143)

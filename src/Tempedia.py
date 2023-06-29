@@ -1,14 +1,14 @@
-from abc import ABC
+
 import json
 import random
 import re
 from typing import Callable, Tuple
 
-from JsonTypedDict import TemTemJson
-from Stat import Stat
-from StatsInitializer import BaseValueInitializer
-import TemTemConstants
-from TemTemType import TemTemType
+from .JsonTypedDict import TemTemJson
+from .Stat import Stat
+from .StatsInitializer import BaseValueInitializer
+from . import TemTemConstants
+from .TemTemType import TemTemType
 
 with open("./temtem_api/temtems.json", encoding="utf8") as file:
     # Load its content and make a new dictionary

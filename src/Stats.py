@@ -5,9 +5,9 @@ from typing import TypeVar
 
 from typing_extensions import NotRequired, TypedDict
 
-import TemTemConstants
-from Stat import Stat, StatValueType, TemStat
-from StatsInitializer import BaseValueInitializer, SvsInitializer, TvsInitializer
+from . import TemTemConstants
+from .Stat import Stat, StatValueType, TemStat
+from .StatsInitializer import BaseValueInitializer, SvsInitializer, TvsInitializer
 
 T = TypeVar("T")
 U = TypeVar("U")

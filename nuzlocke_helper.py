@@ -5,11 +5,11 @@ from typing import Any, Final
 from collections.abc import Iterable
 from typing_extensions import TypedDict, NotRequired
 
-from Stat import Stat
-from Team import PlaythroughTeam
-from Tem import Tem
-from Tempedia import Tempedia
-import TemTemConstants
+from src.Stat import Stat
+from src.Team import PlaythroughTeam
+from src.Tem import Tem
+from src.Tempedia import Tempedia
+import src.TemTemConstants as TemTemConstants
 
 MIN_AI_SVS: Final[int] = TemTemConstants.MIN_SV  # + 24
 

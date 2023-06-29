@@ -4,8 +4,8 @@ import random
 from abc import ABC
 from typing import Callable, Mapping
 
-import TemTemConstants
-from Stat import Stat
+from . import TemTemConstants
+from .Stat import Stat
 
 
 class StatsInitializer(ABC, Mapping):
