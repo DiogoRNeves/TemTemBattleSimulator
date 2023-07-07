@@ -54,7 +54,7 @@ my_team = PlaythroughTeam(
     ]
 )
 
-
+# TODO migrate to arguably
 if __name__ == "__main__":
     from icecream import ic
     import argparse

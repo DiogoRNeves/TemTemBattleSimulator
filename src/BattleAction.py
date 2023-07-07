@@ -1,4 +1,6 @@
 from enum import Enum, auto
+
+from Team import Team
 from .BattleTeam import TeamBattlePosition, Teams
 
 from .Technique import Technique
@@ -36,5 +38,15 @@ class TeamAction:
         raise NotImplementedError
 
 class TurnAction:
-    def __init__(self, team_actions: dict[Teams, TeamAction]):
+    def __init__(self, team_actions: dict[Teams, TeamAction] = {}):        
         raise NotImplementedError
+    
+    @property
+    def is_ready(self) -> bool:
+        raise NotImplementedError 
+    
+    def has_team_action(self, team: Teams) -> bool:
+        raise NotImplementedError
+    
+    def __str__(self) -> str:
+        raise NotImplementedError 
