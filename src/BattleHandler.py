@@ -1,17 +1,15 @@
 
 from abc import ABC, abstractmethod
-from collections import deque
 from queue import PriorityQueue
-from typing import Tuple, Type, TypeVar
+from typing import Type
 
 from BattleState import BattleState
 from .BattleAction import Action, ActionType, TeamAction
 from .BattleState import BattleState, SidedBattleState
-from .BattleTeam import BattleTeams, Teams
+from .BattleTeam import Teams
 from .Team import CompetitiveTeam, PlaythroughTeam, TTeam, Team
 from .patterns.Singleton import singleton
-from asyncio import Task, TaskGroup
-import functools
+from asyncio import TaskGroup
 
 class BattleActionQueue(PriorityQueue[Action]):
     
@@ -29,7 +27,7 @@ class BattleActionQueue(PriorityQueue[Action]):
             # Iterate through the queue and collect items with the minimum priority
             while self.qsize() > 0 and self.queue[0].priority == candidate_action.priority:
                 item = super().get()
-                # if different teams, resolve the tie using state's speed_arrow (save in candidate_action) 
+                # if different teams, resolve the tie using state's speed_arrow
                 # we need to check that teams are different because otherwise we don't switch the arrow  
                 if item.team == candidate_action.team:
                     keep.append(item)

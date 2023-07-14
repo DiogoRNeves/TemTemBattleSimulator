@@ -1,6 +1,5 @@
 from enum import Enum, auto
 
-from Team import Team
 from .BattleTeam import TeamBattlePosition, Teams
 
 from .Technique import Technique

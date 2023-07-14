@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from enum import auto
-from typing import Callable, Self
+from typing import Self
 from .BattleAction import TeamAction, TurnAction
 from .BattleTeam import Teams
 from .Team import Team
