@@ -34,6 +34,10 @@ class Action:
         raise NotImplementedError
     
     @property
+    def team(self) -> Teams:
+        raise NotImplementedError
+    
+    @property
     def priority(self) -> int:
         raise NotImplementedError
 

@@ -20,23 +20,36 @@ class BattleActionQueue(PriorityQueue[Action]):
         Returns the next action, using the current state's speed arrow to resolve ties
         """
         candidate_action = super().get()
+        result: list[Action] = []
         
         if self.queue[0].priority == candidate_action.priority:
             # grab them all
-            candidate_actions = [candidate_action]
+            keep = []
 
             # Iterate through the queue and collect items with the minimum priority
             while self.qsize() > 0 and self.queue[0].priority == candidate_action.priority:
                 item = super().get()
-                candidate_actions.append(item)
+                # if different teams, resolve the tie using state's speed_arrow (save in candidate_action) 
+                # we need to check that teams are different because otherwise we don't switch the arrow  
+                if item.team == candidate_action.team:
+                    keep.append(item)
+                else:
+                    priority_team = state.speed_tie()
+                    if priority_team == item.team:
+                        keep.append(candidate_action)
+                        result.append(item)
+                    else:
+                        keep.append(item)
+                        result.append(candidate_action)
 
-            # if different teams, resolve the tie using state's speed_arrow (save in candidate_action) 
-            # we need to check that teams are different because otherwise we don't switch the arrow   
-            #   put the others back in the queue
-            # else do nothing
-            raise NotImplementedError
+                    # put the others back in the queue
+                    for a in keep:
+                        self.put(a)
+
+        else:
+            result.append(candidate_action)
         
-        return candidate_action
+        return result[0]
     
 
 class BattleAgent(ABC):

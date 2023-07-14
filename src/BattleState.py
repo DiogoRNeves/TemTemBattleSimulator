@@ -70,10 +70,9 @@ class BattleState():
     def clear_generated_actions(self):
         raise NotImplementedError
 
-    def speed_tie(self) -> Team:
-        t = self.__teams[self.__speed_arrow]
+    def speed_tie(self) -> Teams:
         self.__speed_arrow = self.__speed_arrow.next()
-        return t
+        return self.__speed_arrow
     
     def next_phase(self) -> BattlePhase:
         self.__phase = self.__phase.next()
