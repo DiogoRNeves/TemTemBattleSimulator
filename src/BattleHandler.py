@@ -34,11 +34,12 @@ class BattleActionQueue(PriorityQueue[Action]):
                 else:
                     priority_team = state.speed_tie()
                     if priority_team == item.team:
-                        keep.append(candidate_action)
-                        result.append(item)
+                        t = (candidate_action, item)
                     else:
-                        keep.append(item)
-                        result.append(candidate_action)
+                        t = (item, candidate_action)
+                    
+                    keep.append(t[0])
+                    result.append(t[1])
 
                     # put the others back in the queue
                     for a in keep:
