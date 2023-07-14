@@ -1,14 +1,43 @@
 
 from abc import ABC, abstractmethod
-import functools
-from typing import Tuple, Type
-from .BattleAction import ActionType, TeamAction
+from collections import deque
+from queue import PriorityQueue
+from typing import Tuple, Type, TypeVar
+
+from BattleState import BattleState
+from .BattleAction import Action, ActionType, TeamAction
 from .BattleState import BattleState, SidedBattleState
 from .BattleTeam import BattleTeams, Teams
 from .Team import CompetitiveTeam, PlaythroughTeam, TTeam, Team
 from .patterns.Singleton import singleton
 from asyncio import Task, TaskGroup
+import functools
 
+class BattleActionQueue(PriorityQueue[Action]):
+    
+    def get(self, state: BattleState) -> Action:
+        """
+        Returns the next action, using the current state's speed arrow to resolve ties
+        """
+        candidate_action = super().get()
+        
+        if self.queue[0].priority == candidate_action.priority:
+            # grab them all
+            candidate_actions = [candidate_action]
+
+            # Iterate through the queue and collect items with the minimum priority
+            while self.qsize() > 0 and self.queue[0].priority == candidate_action.priority:
+                item = super().get()
+                candidate_actions.append(item)
+
+            # if different teams, resolve the tie using state's speed_arrow (save in candidate_action) 
+            # we need to check that teams are different because otherwise we don't switch the arrow   
+            #   put the others back in the queue
+            # else do nothing
+            raise NotImplementedError
+        
+        return candidate_action
+    
 
 class BattleAgent(ABC):
     def __init__(self) -> None:
@@ -21,30 +50,44 @@ class BattleAgent(ABC):
 class BattleHandler(ABC):
     def __init__(self, team_class: Type[TTeam], disallowed_actions: list[ActionType] = []):
         self.__team_class = team_class
-        self.__allowed_actions = [action_type for action_type in ActionType if action_type not in disallowed_actions]
+        self.__allowed_actions: list[ActionType] = [action_type for action_type in ActionType if action_type not in disallowed_actions]
+        self.__clear_action_queue()
     
-    async def __ask_player_for_action(self, player: BattleAgent, state: SidedBattleState) -> Tuple[TeamAction, Team]:
-        return (player.choose_action(state), state.side)
+    async def __ask_player_for_action(self, player: BattleAgent, state: SidedBattleState) -> TeamAction:
+        return player.choose_action(state)
 
     async def __ask_for_actions(self, state: BattleState, players: dict[Teams, BattleAgent]):          
+        self.__generate_possible_actions(state)
 
-        async with TaskGroup() as tg:      
+        async with TaskGroup() as tg:
             for team in Teams:
                 if not state.is_team_action_selected(team):
                     tg.create_task(
                         self.__ask_player_for_action(players[team], state.for_side(team))
                     ).add_done_callback(
-                        lambda context: state.select_action(*context.result())
+                        lambda context: state.select_action(context.result(), team)
                     )
         
         # we should have all actions in state now
         assert state.is_actions_selected, f"not all actions are registered in state: {state.selected_actions}"
         
+    def __clear_action_queue(self):
+        self.__action_queue: BattleActionQueue = BattleActionQueue()
 
+    def __process_actions(self, state: BattleState):
+        # add selected actions to the queue 
+        for action in state.selected_actions.actions:
+            self.__action_queue.put(action)
 
-    def __process_actions(self, state: BattleState, players: dict[Teams, BattleAgent]): 
-        raise NotImplementedError       
-        state.clear_action_selection()
+        # process the actions
+        while self.__action_queue.qsize() > 0:
+            action = self.__action_queue.get(state)
+            self.__execute_action(action)
+
+        self.__end_turn(state)
+
+    def __execute_action(self, action: Action):
+        raise NotImplementedError
 
     def is_valid_starting_team(self, team: Team) -> bool:
         return isinstance(team, self.__team_class)
@@ -54,7 +97,29 @@ class BattleHandler(ABC):
 
         if state.is_actions_selected:
             await self.__ask_for_actions(state, players)
-        self.__process_actions(state, players)
+        self.__process_actions(state)
+
+    def __end_turn(self, state: BattleState):        
+        # clear selected actions from state
+        state.clear_action_selection()
+        state.clear_generated_actions()
+
+        # call end turn on child class for specific stuff
+        self._end_turn(state)
+
+    def __generate_possible_actions(self, state: BattleState):
+        assert not state.is_actions_selected, "Can't generate actions when actions are already selected."
+        assert state.is_actions_generated, "Can't generate actions when they are already generated"
+
+        self._generate_possible_actions(state)
+
+    @abstractmethod
+    def _generate_possible_actions(self, state: BattleState):
+        pass
+
+    @abstractmethod
+    def _end_turn(self, state: BattleState):
+        pass
 
 
 @singleton
@@ -71,3 +136,9 @@ class EnvironmentBattleHandler(BattleHandler, ABC):
 class TamerBattleHandler(EnvironmentBattleHandler):
     def __init__(self):
         super().__init__([ActionType.RUN])
+
+    def _generate_possible_actions(self, state: BattleState):
+        pass
+
+    def _end_turn(self, state: BattleState):
+        raise NotImplementedError

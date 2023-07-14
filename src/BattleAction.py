@@ -32,6 +32,10 @@ class ActionType(Enum):
 class Action:
     def __init__(self, action_type: ActionType, selected_target: ActionTarget, detail: TI = None):
         raise NotImplementedError
+    
+    @property
+    def priority(self) -> int:
+        raise NotImplementedError
 
 class TeamAction:
     def __init__(self, position_action: dict[TeamBattlePosition, Action]):
@@ -43,6 +47,10 @@ class TurnAction:
     
     @property
     def is_ready(self) -> bool:
+        raise NotImplementedError 
+    
+    @property
+    def actions(self) -> list[Action]:
         raise NotImplementedError 
     
     def has_team_action(self, team: Teams) -> bool:

@@ -1,7 +1,8 @@
 
 
+from __future__ import annotations
 from enum import auto
-from typing import Self
+from typing import Callable, Self
 from .BattleAction import TeamAction, TurnAction
 from .BattleTeam import Teams
 from .Team import Team
@@ -56,11 +57,18 @@ class BattleState():
     def is_actions_selected(self) -> bool:
         return self.__turn_action.is_ready
     
+    @property
+    def is_actions_generated(self) -> bool:
+        raise NotImplementedError
+    
     def __reset_phase_turn(self):
         self.__phase_turn: int = 0                
 
     def clear_action_selection(self):
         self.__turn_action: TurnAction = TurnAction()
+
+    def clear_generated_actions(self):
+        raise NotImplementedError
 
     def speed_tie(self) -> Team:
         t = self.__teams[self.__speed_arrow]
@@ -78,6 +86,6 @@ class BattleState():
     def for_side(self, side: Teams) -> SidedBattleState:
         raise NotImplementedError
     
-    def select_action(self, action: TeamAction, team: Team):
+    def select_action(self, action: TeamAction, team: Teams):
         raise NotImplementedError
     
