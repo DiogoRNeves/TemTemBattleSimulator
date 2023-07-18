@@ -16,9 +16,9 @@ class Battle():
     def state(self) -> BattleState:
         return self.__state
 
-    async def run(self, players: dict[Teams, BattleAgent]) -> BattleResult:        
+    def run(self, players: dict[Teams, BattleAgent]) -> BattleResult:        
         while not self.state.is_over:
-            await self.__handler.next(self.state, players)
+            self.__handler.next(self.state, players)
 
         return self.state.result
 
@@ -50,4 +50,5 @@ if __name__ == '__main__':
     s = BattleState(CompetitiveTeam(tems_spatk), CompetitiveTeam(tems_atk))
 
     b = Battle(s, TamerBattleHandler())
+    
     

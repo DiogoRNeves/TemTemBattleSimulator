@@ -3,13 +3,13 @@ from abc import ABC, abstractmethod
 from queue import PriorityQueue
 from typing import Type
 
-from BattleState import BattleState
+from .BattleState import BattleState
 from .BattleAction import Action, ActionType, TeamAction
 from .BattleState import BattleState, SidedBattleState
 from .BattleTeam import Teams
 from .Team import CompetitiveTeam, PlaythroughTeam, TTeam, Team
 from .patterns.Singleton import singleton
-from asyncio import TaskGroup
+from asyncio import TaskGroup, run
 
 class BattleActionQueue(PriorityQueue[Action]):
     
@@ -111,11 +111,11 @@ class BattleHandler(ABC):
     def is_valid_starting_team(self, team: Team) -> bool:
         return isinstance(team, self.__team_class)
 
-    async def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
+    def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
         assert len(players) == len(Teams), f"teams and players must be the same size: {len(players)} players, {len(Teams)} teams"
 
         if state.is_actions_selected:
-            await self.__ask_for_actions(state, players)
+            run(self.__ask_for_actions(state, players))
         self.__process_actions(state)
 
     def __end_turn(self, state: BattleState):        
