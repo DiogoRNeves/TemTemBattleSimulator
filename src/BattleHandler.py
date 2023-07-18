@@ -18,37 +18,40 @@ class BattleActionQueue(PriorityQueue[Action]):
         Returns the next action, using the current state's speed arrow to resolve ties
         """
         candidate_action = super().get()
-        result: list[Action] = []
+        result: Action = candidate_action
         
         if self.queue[0].priority == candidate_action.priority:
             # grab them all
             keep = []
 
-            # Iterate through the queue and collect items with the minimum priority
+            # Iterate through the queue and collect items with the minimum priority            
             while self.qsize() > 0 and self.queue[0].priority == candidate_action.priority:
                 item = super().get()
                 # if different teams, resolve the tie using state's speed_arrow
-                # we need to check that teams are different because otherwise we don't switch the arrow  
-                if item.team == candidate_action.team:
-                    keep.append(item)
+                # we need to check that teams are different because otherwise we don't switch the arrow 
+                same_team: bool = item.team == candidate_action.team 
+                if same_team:
+                    keep_a = item
                 else:
                     priority_team = state.speed_tie()
                     if priority_team == item.team:
-                        t = (candidate_action, item)
+                        keep_a, result = (candidate_action, item)
                     else:
-                        t = (item, candidate_action)
-                    
-                    keep.append(t[0])
-                    result.append(t[1])
+                        keep_a, result = (item, candidate_action)
+            
+            
+                keep.append(keep_a)
 
-                    # put the others back in the queue
-                    for a in keep:
-                        self.put(a)
+                if not same_team:
+                    # this means a speed tie has been resolved, so we stop looping
+                    # TODO need to check how to resolve speed ties for members of the same team
+                    break
 
-        else:
-            result.append(candidate_action)
+            # put the others back in the queue
+            for a in keep:
+                self.put(a)
         
-        return result[0]
+        return result
     
 
 class BattleAgent(ABC):
@@ -64,6 +67,10 @@ class BattleHandler(ABC):
         self.__team_class = team_class
         self.__allowed_actions: list[ActionType] = [action_type for action_type in ActionType if action_type not in disallowed_actions]
         self.__clear_action_queue()
+
+    @property
+    def _allowed_actions(self) -> list[ActionType]:
+        return self.__allowed_actions    
     
     async def __ask_player_for_action(self, player: BattleAgent, state: SidedBattleState) -> TeamAction:
         return player.choose_action(state)
@@ -138,6 +145,12 @@ class BattleHandler(ABC):
 class CompetitiveBattleHandler(BattleHandler):
     def __init__(self):
         super().__init__(CompetitiveTeam, [ActionType.USE_ITEM, ActionType.RUN])
+    
+    def _generate_possible_actions(self, state: BattleState):
+        raise NotImplementedError
+
+    def _end_turn(self, state: BattleState):
+        raise NotImplementedError
 
 class EnvironmentBattleHandler(BattleHandler, ABC):
     def __init__(self, disallowed_actions: list[ActionType] = []):
@@ -150,7 +163,7 @@ class TamerBattleHandler(EnvironmentBattleHandler):
         super().__init__([ActionType.RUN])
 
     def _generate_possible_actions(self, state: BattleState):
-        pass
+        raise NotImplementedError
 
     def _end_turn(self, state: BattleState):
         raise NotImplementedError

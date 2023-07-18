@@ -22,6 +22,10 @@ class BattlePhase(SequentialEnum):
     def prev(self) -> Self:
         return super().prev(False)
 
+# TODO
+class BattleResult():
+    def __init__(self):
+        raise NotImplementedError
 
 # TODO
 class SidedBattleState():
@@ -59,6 +63,15 @@ class BattleState():
     
     @property
     def is_actions_generated(self) -> bool:
+        raise NotImplementedError
+    
+    @property
+    def is_over(self) -> bool:
+        return self.__phase == BattlePhase.FINISHED
+    
+    @property
+    def result(self) -> BattleResult:
+        assert self.is_over, "Battle must be over to have a result"
         raise NotImplementedError
     
     def __reset_phase_turn(self):

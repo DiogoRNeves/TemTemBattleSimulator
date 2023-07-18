@@ -1,15 +1,26 @@
 
 from typing import Callable
-from .BattleHandler import BattleHandler, TamerBattleHandler
-from .BattleState import BattleState
+
+from .BattleTeam import Teams
+from .BattleHandler import BattleAgent, BattleHandler, TamerBattleHandler
+from .BattleState import BattleResult, BattleState
 from copy import deepcopy
 from .Tem import Tem
-
 
 class Battle():
     def __init__(self, state: BattleState, handler: BattleHandler):
         self.__state: BattleState = deepcopy(state)
-        self.__handler: BattleHandler = handler    
+        self.__handler: BattleHandler = handler
+    
+    @property
+    def state(self) -> BattleState:
+        return self.__state
+
+    async def run(self, players: dict[Teams, BattleAgent]) -> BattleResult:        
+        while not self.state.is_over:
+            await self.__handler.next(self.state, players)
+
+        return self.state.result
 
 if __name__ == '__main__':
     
@@ -39,3 +50,4 @@ if __name__ == '__main__':
     s = BattleState(CompetitiveTeam(tems_spatk), CompetitiveTeam(tems_atk))
 
     b = Battle(s, TamerBattleHandler())
+    
