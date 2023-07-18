@@ -28,9 +28,10 @@ if __name__ == '__main__':
     from .Tempedia import Tempedia
     from .StatsInitializer import TvsInitializer
     from .Stat import Stat
+    from .TemTemConstants import PLAYTHROUGH_TEAM_SIZE
     from icecream import ic
 
-    def generate_team(id_generator: Callable[[],int], tvs: TvsInitializer, team_size: int = 6) -> list[Tem]:
+    def generate_team(id_generator: Callable[[],int], tvs: TvsInitializer, team_size: int = PLAYTHROUGH_TEAM_SIZE) -> list[Tem]:
         t: list[Tem] = []
         for _ in range(team_size):
             id: int = id_generator()

@@ -9,7 +9,7 @@ from .BattleState import BattleState, SidedBattleState
 from .BattleTeam import Teams
 from .Team import CompetitiveTeam, PlaythroughTeam, TTeam, Team
 from .patterns.Singleton import singleton
-from asyncio import TaskGroup, run
+from asyncio import Task, TaskGroup, run
 
 class BattleActionQueue(PriorityQueue[Action]):
     
@@ -72,23 +72,23 @@ class BattleHandler(ABC):
     def _allowed_actions(self) -> list[ActionType]:
         return self.__allowed_actions    
     
-    async def __ask_player_for_action(self, player: BattleAgent, state: SidedBattleState) -> TeamAction:
-        return player.choose_action(state)
+    async def __ask_player_for_action(self, player: BattleAgent, state: BattleState, team: Teams) -> tuple[TeamAction, Teams]:
+        return (player.choose_action(state.for_side(team)), team)
 
-    async def __ask_for_actions(self, state: BattleState, players: dict[Teams, BattleAgent]):          
+    async def __ask_for_actions(self, state: BattleState, players: dict[Teams, BattleAgent]) -> list[tuple[TeamAction, Teams]]:          
         self.__generate_possible_actions(state)
-
+        tasks: list[Task[tuple[TeamAction, Teams]]] = []
+        
         async with TaskGroup() as tg:
             for team in Teams:
-                if not state.is_team_action_selected(team):
-                    tg.create_task(
-                        self.__ask_player_for_action(players[team], state.for_side(team))
-                    ).add_done_callback(
-                        lambda context: state.select_action(context.result(), team)
+                if state.team_has_actions(team) and (not state.is_team_action_selected(team)):
+                    tasks.append(
+                        tg.create_task(
+                            self.__ask_player_for_action(players[team], state, team)
+                        )
                     )
-        
-        # we should have all actions in state now
-        assert state.is_actions_selected, f"not all actions are registered in state: {state.selected_actions}"
+
+        return [t.result() for t in tasks]
         
     def __clear_action_queue(self):
         self.__action_queue: BattleActionQueue = BattleActionQueue()
@@ -114,8 +114,10 @@ class BattleHandler(ABC):
     def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
         assert len(players) == len(Teams), f"teams and players must be the same size: {len(players)} players, {len(Teams)} teams"
 
-        if state.is_actions_selected:
-            run(self.__ask_for_actions(state, players))
+        if not state.is_actions_selected:
+            actions = run(self.__ask_for_actions(state, players)) # asyncio.run
+            for team_action, team in actions:
+                state.select_action(team_action, team)
         self.__process_actions(state)
 
     def __end_turn(self, state: BattleState):        

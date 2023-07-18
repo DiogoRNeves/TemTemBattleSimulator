@@ -75,7 +75,10 @@ class BattleState():
         raise NotImplementedError
     
     def __reset_phase_turn(self):
-        self.__phase_turn: int = 0                
+        self.__phase_turn: int = 0   
+
+    def team_has_actions(self, team: Teams) -> bool:
+        raise NotImplementedError             
 
     def clear_action_selection(self):
         self.__turn_action: TurnAction = TurnAction()
