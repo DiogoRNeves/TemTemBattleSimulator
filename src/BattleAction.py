@@ -46,7 +46,7 @@ class TeamAction:
 
 class TurnAction:
     def __init__(self, team_actions: dict[Teams, TeamAction] = {}):        
-        raise NotImplementedError
+        pass
     
     @property
     def is_ready(self) -> bool:
