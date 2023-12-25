@@ -76,6 +76,8 @@ if __name__ == '__main__':
     }
 
     # this one throws a lot of NotImplementedException at the moment :-)
-    # b.run(p)
+    result: BattleResult = b.run(p)
+
+    ic(result)
     
     

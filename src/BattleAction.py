@@ -1,7 +1,8 @@
+from __future__ import annotations
 from enum import Enum, auto
+from typing import Iterable, Iterator
 
 from .BattleTeam import TeamBattlePosition, Teams
-
 from .Technique import Technique
 
 class Item:
@@ -61,3 +62,16 @@ class TurnAction:
     
     def __str__(self) -> str:
         raise NotImplementedError 
+
+class TurnActionCollection():
+    def __init__(self, turn_actions: Iterable[TurnAction] = []) -> None:
+        self.__turn_actions: set[TurnAction] = set(turn_actions)
+
+    def __len__(self) -> int:
+        return len(self.__turn_actions)
+    
+    def __iter__(self) -> Iterator[TurnAction]:
+        return self.__turn_actions.__iter__()
+
+    def add(self, turn_actions: Iterable[TurnAction]) -> None:
+        self.__turn_actions.union(turn_actions)
