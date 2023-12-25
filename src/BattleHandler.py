@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from queue import PriorityQueue
 from typing import Type
 
-from .BattleState import BattleState
+from .BattleAgent import BattleAgent
 from .BattleAction import Action, ActionType, TeamAction
-from .BattleState import BattleState, SidedBattleState
+from .BattleState import BattleState
 from .BattleTeam import Teams
 from .Team import CompetitiveTeam, PlaythroughTeam, TTeam, Team
 from .patterns.Singleton import singleton
@@ -53,15 +53,6 @@ class BattleActionQueue(PriorityQueue[Action]):
         
         return result
     
-
-class BattleAgent(ABC):
-    def __init__(self) -> None:
-        super().__init__()
-    
-    @abstractmethod
-    def choose_action(self, state: SidedBattleState) -> TeamAction:
-        pass
-
 class BattleHandler(ABC):
     def __init__(self, team_class: Type[TTeam], disallowed_actions: list[ActionType] = []):
         self.__team_class = team_class

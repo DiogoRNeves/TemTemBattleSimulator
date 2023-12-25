@@ -29,12 +29,17 @@ class BattleResult():
 
 # TODO
 class SidedBattleState():
-    def __init__(self, side: Team):
+    def __init__(self, side: Teams, possible_actions: list[TeamAction]):
         self.__side = side
+        self.__possible_actions = possible_actions
 
     @property
-    def side(self) -> Team:
+    def side(self) -> Teams:
         return self.__side
+    
+    @property
+    def possible_actions(self) -> list[TeamAction]:
+        return self.__possible_actions
 
 class BattleState():
     def __init__(self, team_orange: Team, team_blue: Team):
