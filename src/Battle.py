@@ -1,8 +1,9 @@
 
+from random import Random
 from typing import Callable
 
 from .BattleTeam import Teams
-from .BattleHandler import BattleAgent, BattleHandler, TamerBattleHandler
+from .BattleHandler import BattleAgent, BattleHandler
 from .BattleState import BattleResult, BattleState
 from copy import deepcopy
 from .Tem import Tem
@@ -27,14 +28,17 @@ if __name__ == '__main__':
     from .Team import CompetitiveTeam
     from .Tempedia import Tempedia
     from .StatsInitializer import TvsInitializer
+    from .BattleHandler import TamerBattleHandler
     from .Stat import Stat
     from .TemTemConstants import PLAYTHROUGH_TEAM_SIZE
     from icecream import ic
 
-    def generate_team(id_generator: Callable[[],int], tvs: TvsInitializer, team_size: int = PLAYTHROUGH_TEAM_SIZE) -> list[Tem]:
+    r: Random = Random(2)
+
+    def generate_team(id_generator: Callable[[Random],int], tvs: TvsInitializer, team_size: int = PLAYTHROUGH_TEAM_SIZE) -> list[Tem]:
         t: list[Tem] = []
         for _ in range(team_size):
-            id: int = id_generator()
+            id: int = id_generator(r)
             name: str = Tempedia.get_name(id)
 
             ic(name)
