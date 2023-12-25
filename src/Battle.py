@@ -28,9 +28,10 @@ if __name__ == '__main__':
     from .Team import CompetitiveTeam
     from .Tempedia import Tempedia
     from .StatsInitializer import TvsInitializer
-    from .BattleHandler import TamerBattleHandler
+    from .BattleHandler import TamerBattleHandler, EnvironmentBattleHandler, CompetitiveBattleHandler
     from .Stat import Stat
     from .TemTemConstants import PLAYTHROUGH_TEAM_SIZE
+    from .BattleAgent import FirstActionAvailableBattleAgent, RandomBattleAgent
     from icecream import ic
 
     r: Random = Random(2)
@@ -48,12 +49,33 @@ if __name__ == '__main__':
         return t
     
     ic('generating team spatk')
-    tems_spatk = generate_team(Tempedia.get_random_spatk_id, TvsInitializer({Stat.SPD: 500, Stat.SPATK: 500}))
+    tems_spatk = generate_team(
+        Tempedia.get_random_spatk_id, 
+        TvsInitializer({Stat.SPD: 500, Stat.SPATK: 500})
+    )
+
     ic('generating team atk')
-    tems_atk = generate_team(Tempedia.get_random_atk_id, TvsInitializer({Stat.SPD: 500, Stat.ATK: 500}))
+    tems_atk = generate_team(
+        Tempedia.get_random_atk_id, 
+        TvsInitializer({Stat.SPD: 500, Stat.ATK: 500})
+    )
 
-    s = BattleState(CompetitiveTeam(tems_spatk), CompetitiveTeam(tems_atk))
+    s = BattleState(
+        team_orange=CompetitiveTeam(tems_spatk), 
+        team_blue=CompetitiveTeam(tems_atk)
+    )
 
-    b = Battle(s, TamerBattleHandler())
+    b = Battle(
+        state=s, 
+        handler=TamerBattleHandler()
+    )
+
+    p = {
+        Teams.BLUE: RandomBattleAgent(),
+        Teams.ORANGE: FirstActionAvailableBattleAgent()
+    }
+
+    # this one throws a lot of NotImplementedException at the moment :-)
+    # b.run(p)
     
     
