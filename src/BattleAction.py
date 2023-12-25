@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum, auto
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, Optional, Self
 
 from .BattleTeam import TeamBattlePosition, Teams
 from .Technique import Technique
@@ -8,7 +8,7 @@ from .Technique import Technique
 class Item:
     pass
 
-TI = Technique | Item | None
+TechOrItem = Optional[Technique | Item]
 
 class ActionTarget(Enum):
     NO_SELECTION = auto() # some techniques/items do not allow for target selection
@@ -30,7 +30,7 @@ class ActionType(Enum):
     RUN = auto()
 
 class Action:
-    def __init__(self, action_type: ActionType, selected_target: ActionTarget, detail: TI = None):
+    def __init__(self, action_type: ActionType, selected_target: ActionTarget, detail: TechOrItem = None):
         raise NotImplementedError
     
     @property
@@ -46,7 +46,7 @@ class TeamAction:
         raise NotImplementedError
 
 class TurnAction:
-    def __init__(self, team_actions: dict[Teams, TeamAction] = {}):        
+    def __init__(self, team_actions: Optional[dict[Teams, TeamAction]] = None):        
         pass
     
     @property
@@ -62,16 +62,31 @@ class TurnAction:
     
     def __str__(self) -> str:
         raise NotImplementedError 
+    
+class ActionCollection():
+    def __init__(self) -> None:
+        self.__actions: dict[Teams, dict[TeamBattlePosition, Iterable[Action]]] = {
+            Teams.BLUE: {
+                TeamBattlePosition.LEFT: set(),
+                TeamBattlePosition.RIGHT: set(),
+            },
+            Teams.ORANGE: {
+                TeamBattlePosition.LEFT: set(),
+                TeamBattlePosition.RIGHT: set(),
+            }
+        }
+
+    @property
+    def possible_turn_actions(self) -> Iterable[TurnAction]:
+        # convert the individual actions into turn actions
+        raise NotImplementedError
+    
+    def add(self, actions: dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]) -> None:
+        raise NotImplementedError
 
 class TurnActionCollection():
-    def __init__(self, turn_actions: Iterable[TurnAction] = []) -> None:
-        self.__turn_actions: set[TurnAction] = set(turn_actions)
-
-    def __len__(self) -> int:
-        return len(self.__turn_actions)
+    def __init__(self, actions: ActionCollection) -> None:
+        self.__turn_actions: Iterable[TurnAction] = actions.possible_turn_actions
     
     def __iter__(self) -> Iterator[TurnAction]:
         return self.__turn_actions.__iter__()
-
-    def add(self, turn_actions: Iterable[TurnAction]) -> None:
-        self.__turn_actions.union(turn_actions)

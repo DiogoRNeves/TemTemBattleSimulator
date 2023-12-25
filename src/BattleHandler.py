@@ -1,12 +1,12 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from queue import PriorityQueue
-from typing import Callable, Iterable, Type
+from typing import Callable, Iterable, Optional, Type
 
 from .BattleAgent import BattleAgent
-from .BattleAction import Action, ActionType, TeamAction, TurnAction, TurnActionCollection
+from .BattleAction import Action, ActionCollection, ActionType, TeamAction, TurnAction, TurnActionCollection
 from .BattleState import BattleState
-from .BattleTeam import Teams
+from .BattleTeam import TeamBattlePosition, Teams
 from .Team import CompetitiveTeam, PlaythroughTeam, TTeam, Team
 from .patterns.Singleton import singleton
 from asyncio import Task, TaskGroup, run
@@ -58,7 +58,7 @@ class BattleHandler(ABC):
         self.__team_class = team_class
         self.__allowed_actions: list[ActionType] = [action_type for action_type in ActionType if action_type not in disallowed_actions]
         self.__clear_action_queue()
-        self._possible_actions: TurnActionCollection = TurnActionCollection()
+        self._possible_actions: Optional[TurnActionCollection] = None
 
     @property
     def _allowed_actions(self) -> list[ActionType]:
@@ -126,52 +126,52 @@ class BattleHandler(ABC):
 
         self._generate_possible_actions(state)
 
-    def __possible_turn_actions(self, state: BattleState, action_type: ActionType) -> Iterable[TurnAction]:
+    def __possible_actions(self, state: BattleState, action_type: ActionType) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
         # i know i can use reflection, but this makes it easier to read 
         # and the linter doesn't complain about private methods not being used
         match (action_type):
             case ActionType.USE_TECHNIQUE:
-                return self.__possible_turn_actions_use_technique(state)
+                return self.__possible_actions_use_technique(state)
             case ActionType.SWITCH:
-                return self.__possible_turn_actions_switch(state)
+                return self.__possible_turn_action_switch(state)
             case ActionType.REST:
-                return self.__possible_turn_actions_rest(state)
+                return self.__possible_actions_rest(state)
             case ActionType.USE_ITEM:
-                return self.__possible_turn_actions_use_item(state)
+                return self.__possible_actions_use_item(state)
             case ActionType.RUN:
-                return self.__possible_turn_actions_run(state)
+                return self.__possible_actions_run(state)
             case unsupported_action_type:
                 raise ValueError(f"Unsupported action type: {unsupported_action_type}")
     
-    def __possible_turn_actions_use_technique(self, state: BattleState) -> Iterable[TurnAction]:
+    def __possible_actions_use_technique(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
         raise NotImplementedError
         return []
     
-    def __possible_turn_actions_switch(self, state: BattleState) -> Iterable[TurnAction]:
+    def __possible_turn_action_switch(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
         raise NotImplementedError
         return []
     
-    def __possible_turn_actions_rest(self, state: BattleState) -> Iterable[TurnAction]:
+    def __possible_actions_rest(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
         raise NotImplementedError
         return []
     
-    def __possible_turn_actions_use_item(self, state: BattleState) -> Iterable[TurnAction]:
+    def __possible_actions_use_item(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
         raise NotImplementedError
         return []
     
-    def __possible_turn_actions_run(self, state: BattleState) -> Iterable[TurnAction]:
+    def __possible_actions_run(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
         raise NotImplementedError
         return []
 
     def _generate_possible_actions(self, state: BattleState):
-        if len(self._possible_actions) > 0:
-            self._possible_actions = TurnActionCollection()
-
+        actions: ActionCollection = ActionCollection()
         for action_type in self.__allowed_actions:
-            turn_actions = self.__possible_turn_actions(state, action_type)
+            acts = self.__possible_actions(state, action_type)
             
-            if any(turn_actions):
-                self._possible_actions.add(turn_actions)
+            if any(acts):
+                actions.add(acts)
+
+        self._possible_actions = TurnActionCollection(actions)
     
 
     @abstractmethod
