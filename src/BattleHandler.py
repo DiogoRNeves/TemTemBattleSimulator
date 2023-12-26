@@ -143,7 +143,7 @@ class BattleHandler(ABC):
             case ActionType.RUN:
                 return self.__possible_actions_run(state)
             case unsupported_action_type:
-                raise ValueError(f"Unsupported action type: {unsupported_action_type}")
+                raise ValueError(f"Unsupported action type: {unsupported_action_type.name}")
     
     def __possible_actions_use_technique(self, state: BattleState) -> ActionCollection:
         raise NotImplementedError
