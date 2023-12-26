@@ -1,8 +1,8 @@
 from abc import ABC
 import random
 from typing import Callable, Final, Iterator
-from .Technique import Technique
-from . import TemTemConstants
+from src.technique import Technique
+from src.tem_tem_constants import NUMBER_OF_BATTLE_TECHNIQUES
 
 
 class TechniqueSet(ABC):
@@ -79,7 +79,7 @@ class TechniqueSet(ABC):
 
 class BattleTechniques(TechniqueSet):
     def __init__(self, techniques: list[str]):
-        super().__init__(techniques, TemTemConstants.NUMBER_OF_BATTLE_TECHNIQUES)
+        super().__init__(techniques, NUMBER_OF_BATTLE_TECHNIQUES)
 
 
 class LearnableTechniques(TechniqueSet):

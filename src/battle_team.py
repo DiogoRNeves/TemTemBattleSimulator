@@ -1,7 +1,7 @@
 
 from enum import auto
-from .Tem import Tem
-from .patterns.SequentialEnum import SequentialEnum
+from src.tem import Tem
+from patterns.sequential_enum import SequentialEnum
 
 
 class TeamBattlePosition(SequentialEnum):

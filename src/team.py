@@ -1,8 +1,8 @@
 from abc import ABC
 from typing import Final, Iterable, TypeVar
-from .Tem import Tem
-from . import TemTemConstants
-from icecream import ic
+
+from src.tem import Tem
+from src.tem_tem_constants import *
 
 
 class Team(ABC):
@@ -110,7 +110,7 @@ class CompetitiveTeam(Team):
         - tems (Iterable[Tem]): An iterable of Tem objects to be included in the team.
         """
         # TODO validate all species are different
-        super().__init__(TemTemConstants.COMPETITIVE_TEAM_SIZE, tems)
+        super().__init__(COMPETITIVE_TEAM_SIZE, tems)
 
 
 class PlaythroughTeam(Team):
@@ -123,5 +123,5 @@ class PlaythroughTeam(Team):
         Args:
         - tems (Iterable[Tem]): An iterable of Tem objects to be included in the team.
         """
-        super().__init__(TemTemConstants.PLAYTHROUGH_TEAM_SIZE, tems)
+        super().__init__(PLAYTHROUGH_TEAM_SIZE, tems)
 

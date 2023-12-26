@@ -3,8 +3,8 @@ from __future__ import annotations
 from enum import Enum, auto
 from math import floor
 
-from . import TemTemConstants 
-from .JsonTypedDict import TemTemStatsJson
+from src.tem_tem_constants import MAX_TV, MAX_TV_TOTAL, MIN_TV
+from src.json_typed_dict import TemTemStatsJson
 
 
 class StatValueType(Enum):
@@ -103,7 +103,7 @@ class TemStat:
         Returns:
         - int: The number of available TV points.
         """
-        return TemTemConstants.MAX_TV - self.get_value(StatValueType.TV)
+        return MAX_TV - self.get_value(StatValueType.TV)
 
     @property
     def base(self) -> int:
@@ -159,9 +159,9 @@ class TemStat:
         self.__values[StatValueType.TV] = max(
             min(
                 self.__values[StatValueType.TV] + min(amount, self.available_tvs),
-                TemTemConstants.MAX_TV_TOTAL,
+                MAX_TV_TOTAL,
             ),
-            TemTemConstants.MIN_TV,
+            MIN_TV,
         )
 
     def __calc_hp(self, level: int) -> int:

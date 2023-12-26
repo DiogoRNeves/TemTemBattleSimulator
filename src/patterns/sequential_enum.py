@@ -1,11 +1,12 @@
 from enum import Enum
-from typing import Self
+from typing import TypeVar
 
+SE = TypeVar('SE', bound='SequentialEnum')
 
 class SequentialEnum(Enum):
-    def next(self, loop: bool = True) -> Self:
+    def next(self: SE, loop: bool = True) -> SE:
         cls = self.__class__
-        members = list(cls)
+        members: list[SE] = list(cls.__members__.values())
         index = members.index(self) + 1
         if index >= len(members):
             if loop:
@@ -15,9 +16,9 @@ class SequentialEnum(Enum):
                 raise StopIteration('end of enumeration reached')
         return members[index]
 
-    def prev(self, loop: bool = True) -> Self:
+    def prev(self: SE, loop: bool = True) -> SE:
         cls = self.__class__
-        members = list(cls)
+        members: list[SE] = list(cls)
         index = members.index(self) - 1
         if index < 0:
             if loop:
@@ -26,3 +27,4 @@ class SequentialEnum(Enum):
             else:
                 raise StopIteration('beginning of enumeration reached')
         return members[index]
+    

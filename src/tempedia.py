@@ -1,16 +1,15 @@
 
 import json
-import random
 import re
 from typing import Callable, Tuple
-
-from .JsonTypedDict import TemTemJson
-from .Stat import Stat
-from .StatsInitializer import BaseValueInitializer
-from . import TemTemConstants
-from .TemTemType import TemTemType
-
 from random import Random
+
+from src.json_typed_dict import TemTemJson
+from src.stat import Stat
+from src.stats_initializer import BaseValueInitializer
+from src.tem_tem_constants import TEM_MIN_LEVEL, TEM_MAX_LEVEL
+from src.tem_tem_type import TemTemType
+
 
 with open("./temtem_api/temtems.json", encoding="utf8") as file:
     # Load its content and make a new dictionary
@@ -144,7 +143,7 @@ class Tempedia():
 
     @staticmethod
     def get_latest_learnable_technique_names(tem_id: int, level: int, max_number_of_techniques: int) -> list[str]:
-        assert level >= TemTemConstants.TEM_MIN_LEVEL and level <= TemTemConstants.TEM_MAX_LEVEL, f"Level not allowed: {level=}"
+        assert level >= TEM_MIN_LEVEL and level <= TEM_MAX_LEVEL, f"Level not allowed: {level=}"
         
         # always return at least one technique name
         if max_number_of_techniques < 1:

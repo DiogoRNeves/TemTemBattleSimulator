@@ -6,9 +6,9 @@ import random
 from enum import Enum, auto
 from typing import Iterable
 
-from .JsonTypedDict import TechniqueJson
-from .Stat import Stat
-from .TemTemType import TemTemType, TemType
+from src.json_typed_dict import TechniqueJson
+from src.stat import Stat
+from src.tem_tem_type import TemTemType, TemType
 
 with open("./temtem_api/techniques.json", encoding="utf8") as file:
     # Load its content and make a new dictionary

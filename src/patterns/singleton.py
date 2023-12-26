@@ -9,7 +9,7 @@ class Singleton(type):
 
 # https://old.reddit.com/r/Python/comments/2qkwgh/class_to_enforce_singleton_pattern_on_subclasses/
 def singleton(theclass):
-    # Assumes that theclass doesn't define a __new__ method. 
+    # Assumes that theclass doesn't define a __new__ method.
     # Defining __init__ is okay though.
     theclass._instance = None
     lock = threading.Lock()
@@ -17,7 +17,7 @@ def singleton(theclass):
         with lock:
             if cls._instance is None:
                 if theclass.__base__ is object:
-                    obj = super(theclass, cls).__new__(cls)
+                    obj = super(theclass, cls).__new__(cls, None)
                 else:
                     obj = super(theclass, cls).__new__(cls, *args, **kwargs)
                 cls._instance = obj

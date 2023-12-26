@@ -3,10 +3,10 @@
 from __future__ import annotations
 from enum import auto
 from typing import Self
-from .BattleAction import TeamAction, TurnAction
-from .BattleTeam import TeamBattlePosition, Teams
-from .Team import Team
-from .patterns.SequentialEnum import SequentialEnum
+from src.battle_action import TeamAction, TurnAction
+from src.battle_team import TeamBattlePosition, Teams
+from src.team import Team
+from patterns.sequential_enum import SequentialEnum
 
 
 class BattlePhase(SequentialEnum):
