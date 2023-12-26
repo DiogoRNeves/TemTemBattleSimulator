@@ -4,7 +4,7 @@ from __future__ import annotations
 from enum import auto
 from typing import Self
 from .BattleAction import TeamAction, TurnAction
-from .BattleTeam import Teams
+from .BattleTeam import TeamBattlePosition, Teams
 from .Team import Team
 from .patterns.SequentialEnum import SequentialEnum
 
@@ -88,9 +88,6 @@ class BattleState():
     def clear_action_selection(self):
         self.__turn_action: TurnAction = TurnAction()
 
-    def clear_generated_actions(self):
-        raise NotImplementedError
-
     def speed_tie(self) -> Teams:
         self.__speed_arrow = self.__speed_arrow.next()
         return self.__speed_arrow
@@ -102,6 +99,10 @@ class BattleState():
     
     def is_team_action_selected(self, team: Teams) -> bool:
         return self.__turn_action.has_team_action(team)
+    
+    def team_has_temtem_in_position(self, team: Teams, position: TeamBattlePosition):
+        # TODO implement a battlefield that takes care of the positions
+        raise NotImplementedError
     
     def for_side(self, side: Teams) -> SidedBattleState:
         raise NotImplementedError

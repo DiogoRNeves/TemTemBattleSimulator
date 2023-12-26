@@ -8,7 +8,7 @@ from .Technique import Technique
 class Item:
     pass
 
-TechOrItem = Optional[Technique | Item]
+TechOrItem = Technique | Item
 
 class ActionTarget(Enum):
     NO_SELECTION = auto() # some techniques/items do not allow for target selection
@@ -30,7 +30,7 @@ class ActionType(Enum):
     RUN = auto()
 
 class Action:
-    def __init__(self, action_type: ActionType, selected_target: ActionTarget, detail: TechOrItem = None):
+    def __init__(self, action_type: ActionType, selected_target: ActionTarget, detail: Optional[TechOrItem] = None):
         raise NotImplementedError
     
     @property
@@ -65,7 +65,7 @@ class TurnAction:
     
 class ActionCollection():
     def __init__(self) -> None:
-        self.__actions: dict[Teams, dict[TeamBattlePosition, Iterable[Action]]] = {
+        self.__actions: dict[Teams, dict[TeamBattlePosition, set[Action]]] = {
             Teams.BLUE: {
                 TeamBattlePosition.LEFT: set(),
                 TeamBattlePosition.RIGHT: set(),
@@ -76,13 +76,44 @@ class ActionCollection():
             }
         }
 
+    def has_actions(self, team: Optional[Teams] = None, position: Optional[TeamBattlePosition] = None) -> bool:                        
+        teams = [team] if team else list(Teams)
+        positions = [position] if position else list(TeamBattlePosition)
+
+        for t in teams:
+            for p  in positions:
+                if any(self.__actions[t][p]):
+                    return True
+
+        return False
+
+    def get_actions(self, team: Optional[Teams] = None, position: Optional[TeamBattlePosition] = None) -> Iterable[Action]:
+        teams = [team] if team else list(Teams)
+        positions = [position] if position else list(TeamBattlePosition)
+
+        res: set[Action] = set()
+
+        for t in teams:
+            for p  in positions:
+                actions = self.__actions[t][p]
+                if any(actions):
+                    res.union(actions)
+
+        return res
+    
+    def add(self, action: Action, team: Teams, position: TeamBattlePosition):
+        self.__actions[team][position].add(action)
+
     @property
     def possible_turn_actions(self) -> Iterable[TurnAction]:
         # convert the individual actions into turn actions
         raise NotImplementedError
     
-    def add(self, actions: dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]) -> None:
-        raise NotImplementedError
+    def union(self, actions: Self) -> None:
+        for t in Teams:
+            for p in TeamBattlePosition:
+                if actions.has_actions(t, p):
+                    self.__actions[t][p].union(actions.get_actions(t, p))
 
 class TurnActionCollection():
     def __init__(self, actions: ActionCollection) -> None:

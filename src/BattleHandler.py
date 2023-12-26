@@ -4,7 +4,7 @@ from queue import PriorityQueue
 from typing import Callable, Iterable, Optional, Type
 
 from .BattleAgent import BattleAgent
-from .BattleAction import Action, ActionCollection, ActionType, TeamAction, TurnAction, TurnActionCollection
+from .BattleAction import Action, ActionCollection, ActionType, TeamAction, TurnActionCollection, ActionTarget
 from .BattleState import BattleState
 from .BattleTeam import TeamBattlePosition, Teams
 from .Team import CompetitiveTeam, PlaythroughTeam, TTeam, Team
@@ -54,7 +54,7 @@ class BattleActionQueue(PriorityQueue[Action]):
         return result
 
 class BattleHandler(ABC):    
-    def __init__(self, team_class: Type[TTeam], disallowed_actions: list[ActionType] = []):
+    def __init__(self, team_class: Type[TTeam], disallowed_actions: Iterable[ActionType] = []):
         self.__team_class = team_class
         self.__allowed_actions: list[ActionType] = [action_type for action_type in ActionType if action_type not in disallowed_actions]
         self.__clear_action_queue()
@@ -115,18 +115,20 @@ class BattleHandler(ABC):
     def __end_turn(self, state: BattleState):        
         # clear selected actions from state
         state.clear_action_selection()
-        state.clear_generated_actions()
+        self._clear_generated_actions()
 
         # call end turn on child class for specific stuff
         self._end_turn(state)
 
+    def _clear_generated_actions(self): 
+        self._possible_actions = None
+
     def __generate_possible_actions(self, state: BattleState):
         assert not state.is_actions_selected, "Can't generate actions when actions are already selected."
-        assert state.is_actions_generated, "Can't generate actions when they are already generated"
 
         self._generate_possible_actions(state)
 
-    def __possible_actions(self, state: BattleState, action_type: ActionType) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
+    def __possible_actions(self, state: BattleState, action_type: ActionType) -> ActionCollection:
         # i know i can use reflection, but this makes it easier to read 
         # and the linter doesn't complain about private methods not being used
         match (action_type):
@@ -143,33 +145,44 @@ class BattleHandler(ABC):
             case unsupported_action_type:
                 raise ValueError(f"Unsupported action type: {unsupported_action_type}")
     
-    def __possible_actions_use_technique(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
+    def __possible_actions_use_technique(self, state: BattleState) -> ActionCollection:
         raise NotImplementedError
         return []
     
-    def __possible_turn_action_switch(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
+    def __possible_turn_action_switch(self, state: BattleState) -> ActionCollection:
         raise NotImplementedError
         return []
     
-    def __possible_actions_rest(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
-        raise NotImplementedError
-        return []
+    def __possible_actions_rest(self, state: BattleState) -> ActionCollection:
+        actions = ActionCollection()
+        for team in Teams:
+            for position in TeamBattlePosition:
+                # TODO: check if there are any situations where a temtem can't rest
+                # we are assuming they can always rest, if they are out
+                if state.team_has_temtem_in_position(team, position):
+                    actions.add(
+                        Action(ActionType.RUN, ActionTarget.NO_SELECTION),
+                        team,
+                        position
+                    )
+        return actions
     
-    def __possible_actions_use_item(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
-        raise NotImplementedError
-        return []
+    def __possible_actions_use_item(self, state: BattleState) -> ActionCollection:
+        # raise NotImplementedError
+        # TODO: use an item someday
+        return ActionCollection()
     
-    def __possible_actions_run(self, state: BattleState) -> dict[Teams, dict[TeamBattlePosition, Iterable[Action]]]:
-        raise NotImplementedError
-        return []
+    def __possible_actions_run(self, state: BattleState) -> ActionCollection:        
+        # we are strong. we never run.
+        return ActionCollection()
 
     def _generate_possible_actions(self, state: BattleState):
         actions: ActionCollection = ActionCollection()
         for action_type in self.__allowed_actions:
-            acts = self.__possible_actions(state, action_type)
+            actions_for_type = self.__possible_actions(state, action_type)
             
-            if any(acts):
-                actions.add(acts)
+            if actions_for_type.has_actions():
+                actions.union(actions_for_type)
 
         self._possible_actions = TurnActionCollection(actions)
     
@@ -189,7 +202,7 @@ class CompetitiveBattleHandler(BattleHandler):
         raise NotImplementedError
 
 class EnvironmentBattleHandler(BattleHandler, ABC):
-    def __init__(self, disallowed_actions: list[ActionType] = []):
+    def __init__(self, disallowed_actions: Iterable[ActionType] = []):
         super().__init__(PlaythroughTeam, disallowed_actions)
 
 
