@@ -92,7 +92,7 @@ class Team(ABC):
 
     def __iter__(self):
         return self.__tems.__iter__()
-    
+
     def __repr__(self):
         return [f"level {t.level} {t.display_name} with techs: {[tech.name for tech in t.battle_techniques]}" for t in self].__repr__()
 
@@ -124,4 +124,3 @@ class PlaythroughTeam(Team):
         - tems (Iterable[Tem]): An iterable of Tem objects to be included in the team.
         """
         super().__init__(TemTemConstants.PLAYTHROUGH_TEAM_SIZE, tems)
-

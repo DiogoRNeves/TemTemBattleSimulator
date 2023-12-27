@@ -150,7 +150,5 @@ class BaseValueInitializer(StatsInitializer):
         for stat in Stat:
             assert (
                 stat in values.keys()
-            ), f"Can't initialize stat {stat}, it is not allowed."        
+            ), f"Can't initialize stat {stat}, it is not allowed."
         super().__init__(TemTemConstants.MIN_BASE_VALUE, TemTemConstants.MAX_BASE_VALUE, values, 0)
-
-    

@@ -8,7 +8,7 @@ class TeamBattlePosition(SequentialEnum):
     RIGHT = auto()
     LEFT = auto()
 
-class Teams(SequentialEnum):    
+class Teams(SequentialEnum):
     ORANGE = auto()
     BLUE = auto()
 

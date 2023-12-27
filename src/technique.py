@@ -196,7 +196,7 @@ class Technique:
         assert lookup_name in _techniques.keys(), f"Technique not found: {name}"
         t = _techniques[lookup_name]
         self.__name: str = t["name"]
-        self.__damage: int = t["damage"]        
+        self.__damage: int = t["damage"]
         self.__type: TemTemType = TemTemType.from_string(t["type"])
         self.__stamina_cost: int = t["staminaCost"]
         self.__hold: int = t["hold"]
@@ -230,11 +230,11 @@ class Technique:
         ]
         rand_name = random.choice(names)
         return Technique(rand_name)
-    
+
     @property
     def name(self) -> str:
         return self.__name
-    
+
     @property
     def inflicts_damage(self) -> bool:
         return self.__class != TechniqueClass.STATUS
@@ -328,7 +328,7 @@ class Technique:
         - str: A string representation of the `Technique` object.
         """
         return {"name": self.__name, "type": self.type}.__repr__()
-    
+
     def __eq__(self, __o: Technique) -> bool:
         return self.name == __o.name
 

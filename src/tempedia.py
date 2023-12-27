@@ -144,7 +144,7 @@ class Tempedia():
     @staticmethod
     def get_latest_learnable_technique_names(tem_id: int, level: int, max_number_of_techniques: int) -> list[str]:
         assert level >= TemTemConstants.TEM_MIN_LEVEL and level <= TemTemConstants.TEM_MAX_LEVEL, f"Level not allowed: {level=}"
-        
+
         # always return at least one technique name
         if max_number_of_techniques < 1:
             max_number_of_techniques = 1
@@ -167,7 +167,7 @@ class Tempedia():
         - int: The number of temtems in the database.
         """
         return len(_tems)
-    
+
 if __name__=='__main__':
     from icecream import ic
 

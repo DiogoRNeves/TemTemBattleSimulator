@@ -27,4 +27,3 @@ class SequentialEnum(Enum):
             else:
                 raise StopIteration('beginning of enumeration reached')
         return members[index]
-    

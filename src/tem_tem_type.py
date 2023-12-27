@@ -24,36 +24,36 @@ class TemTemType(Enum):
     TOXIC = auto()
 
     def get_multiplier(self, *defenders: TemTemType) -> float:
-        """Calculate the total type multiplier of the attacker TemTemType 
+        """Calculate the total type multiplier of the attacker TemTemType
         against multiple defender TemTemTypes.
 
         Args:
-        - *defenders: One or more defender TemTemTypes against which the 
+        - *defenders: One or more defender TemTemTypes against which the
                       attacker TemTemType's multiplier is to be calculated.
 
         Returns:
-        - float: The total type multiplier of the attacker TemTemType against 
+        - float: The total type multiplier of the attacker TemTemType against
                  all the defender TemTemTypes.
         """
         return math.prod([self._get_multiplier(defender) for defender in defenders])
 
     def _get_multiplier(self, defender: TemTemType) -> float:
-        """Calculate the type multiplier of the attacker TemTemType against 
+        """Calculate the type multiplier of the attacker TemTemType against
         a single defender TemTemType.
 
         Args:
-        - defender: The defender TemTemType against which the attacker 
+        - defender: The defender TemTemType against which the attacker
                     TemTemType's multiplier is to be calculated.
 
         Returns:
-        - float: The type multiplier of the attacker TemTemType against the 
+        - float: The type multiplier of the attacker TemTemType against the
                  defender TemTemType.
         """
         return _multipliers[self][defender]
 
     @staticmethod
     def from_string(type: str) -> TemTemType:
-        """Return the corresponding TemTemType enum value for the given 
+        """Return the corresponding TemTemType enum value for the given
         type string.
 
         Args:
@@ -69,7 +69,7 @@ class TemTemType(Enum):
         """Return a random TemTemType that is not in the exclude_type list.
 
         Args:
-        - *exclude_type: A list of TemTemTypes that the returned TemTemType 
+        - *exclude_type: A list of TemTemTypes that the returned TemTemType
                          should not be.
 
         Returns:
@@ -159,9 +159,9 @@ class TemType:
         return self.__current_types.__repr__()
 
 if __name__ == "__main__":
-    
+
     from icecream import ic
-    
+
     effectiveness_table = {
         attacker: {
             defender1: {
@@ -178,8 +178,7 @@ if __name__ == "__main__":
         for defender1, val2 in val1.items():
             for defender2, multiplier in val2.items():
                 if multiplier != 1:
-                    ic(f"{atacker} -> {defender1}, {defender2} = {multiplier}") 
+                    ic(f"{atacker} -> {defender1}, {defender2} = {multiplier}")
                     count += 1
 
     ic(count)
-    

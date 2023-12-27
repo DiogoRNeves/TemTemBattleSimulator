@@ -68,7 +68,7 @@ if __name__ == "__main__":
                 f"CustomTem must have a format of [TemSpeciesName],[level]: {val=}"
             )
         return {"name": t[0], "level": int(t[1]), "techniques": []}
-    
+
     def dojo_leader_tems(val: str) -> list[ConfigTem]:
         raise NotImplementedError
 
