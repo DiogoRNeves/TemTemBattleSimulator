@@ -29,7 +29,7 @@ if __name__ == '__main__':
     from src.tempedia import Tempedia
     from src.stats_initializer import TvsInitializer
     from src.battle_handler import TamerBattleHandler
-    from src.stat import Stat
+    from src.tem_stat import Stat
     from src.tem_tem_constants import PLAYTHROUGH_TEAM_SIZE
     from src.battle_agent import FirstActionAvailableBattleAgent, RandomBattleAgent
     from icecream import ic

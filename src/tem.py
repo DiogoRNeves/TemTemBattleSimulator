@@ -7,7 +7,7 @@ from typing import Callable, Type, final
 from typing_extensions import NotRequired, TypedDict
 from src.technique_set import BattleTechniques, LearnableTechniques
 
-from src.tem_tem_constants import *
+import src.tem_tem_constants as TemTemConstants
 from src.stats import (
     CompetitiveStats,
     RandomEncounterStats,
@@ -49,7 +49,7 @@ class TemSpecies(ABC):
         self._base = Tempedia.get_base_value_initializer(id)
         self.__species_name = Tempedia.get_name(id)
 
-        if self.__species_name.lower() in MULTIPLE_SECONDARY_TYPE:
+        if self.__species_name.lower() in TemTemConstants.MULTIPLE_SECONDARY_TYPE:
             assert (
                 secondary_type != TemTemType.NO_TYPE
             ), f"{self.__species_name} has a variable secondary type that must be specified."
@@ -106,7 +106,7 @@ class TemSpecies(ABC):
     def _get_latest_learnable_techniques(
         self,
         level: int,
-        max_number_of_techniques: int = NUMBER_OF_BATTLE_TECHNIQUES,
+        max_number_of_techniques: int = TemTemConstants.NUMBER_OF_BATTLE_TECHNIQUES,
     ) -> LearnableTechniques:
         return LearnableTechniques(
             Tempedia.get_latest_learnable_technique_names(
@@ -145,7 +145,7 @@ class Tem(TemSpecies):
         """
         kwargs: TemSpeciesArg = {"id": id}
 
-        if Tempedia.get_name(id).lower() in MULTIPLE_SECONDARY_TYPE:
+        if Tempedia.get_name(id).lower() in TemTemConstants.MULTIPLE_SECONDARY_TYPE:
             if secondary_type == TemTemType.NO_TYPE:
                 secondary_type = TemTemType.get_random_type(secondary_type)
             kwargs["secondary_type"] = secondary_type
@@ -158,7 +158,7 @@ class Tem(TemSpecies):
             kargs["svs"] = svs
         self.__stats = stat_cls(**kargs)
         self.__level = (
-            level(TEM_MIN_LEVEL, TEM_MAX_LEVEL)
+            level(TemTemConstants.TEM_MIN_LEVEL, TemTemConstants.TEM_MAX_LEVEL)
             if callable(level)
             else level
         )
@@ -171,8 +171,8 @@ class Tem(TemSpecies):
         self.__battle_techniques = BattleTechniques(battle_technique_names)
 
         assert (
-            self.__level >= TEM_MIN_LEVEL
-            and self.__level <= TEM_MAX_LEVEL
+            self.__level >= TemTemConstants.TEM_MIN_LEVEL
+            and self.__level <= TemTemConstants.TEM_MAX_LEVEL
         ), f"Level {level} is not allowed."
 
     @classmethod
@@ -274,7 +274,7 @@ class Tem(TemSpecies):
         svs: list[int] = [],
         tvs: list[int] = [],
         level: int = random.randint(
-            TEM_MIN_LEVEL, TEM_MAX_LEVEL
+            TemTemConstants.TEM_MIN_LEVEL, TemTemConstants.TEM_MAX_LEVEL
         ),
         secondary_type: TemTemType = TemTemType.NO_TYPE,
         nickname: str = "",
@@ -425,7 +425,7 @@ class Tem(TemSpecies):
         Returns:
         - None
         """
-        self.__level = min(self.__level + levels, TEM_MAX_LEVEL)
+        self.__level = min(self.__level + levels, TemTemConstants.TEM_MAX_LEVEL)
 
     def calculate_atacking_damage(
         self, technique: Technique, def_tem: Tem, *extra_modifiers: float
@@ -448,7 +448,7 @@ class Tem(TemSpecies):
         df = def_tem.stats[technique.def_stat]
 
         if technique.type in self.types:
-            extra_modifiers = extra_modifiers + (STAB_MODIFIER,)
+            extra_modifiers = extra_modifiers + (TemTemConstants.STAB_MODIFIER,)
 
         return technique.calculate_damage(
             self.level, atk, df, def_tem.types, *extra_modifiers

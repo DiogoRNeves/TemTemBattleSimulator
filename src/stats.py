@@ -5,8 +5,8 @@ from typing import TypeVar
 
 from typing_extensions import NotRequired, TypedDict
 
-from src.tem_tem_constants import *
-from src.stat import Stat, StatValueType, TemStat
+import src.tem_tem_constants as TemTemConstants
+from src.tem_stat import Stat, StatValueType, TemStat
 from src.stats_initializer import BaseValueInitializer, SvsInitializer, TvsInitializer
 
 T = TypeVar("T")
@@ -122,7 +122,7 @@ class Stats:
         """
         super().__init__()
         assert tvs.is_ok(
-            MAX_TV_TOTAL
+            TemTemConstants.MAX_TV_TOTAL
         ), f"TV totals are not OK for f{tvs}"
         self.__stats = {
             stat: TemStat(base[stat], svs[stat], tvs[stat], stat) for stat in Stat
@@ -153,7 +153,7 @@ class Stats:
             True if the total TV value, plus the specified increment, does not exceed the
             maximum allowed TV value; False otherwise.
         """
-        return self.total_tvs + increment <= MAX_TV_TOTAL
+        return self.total_tvs + increment <= TemTemConstants.MAX_TV_TOTAL
 
     def change_tv(self, stat: Stat, amount: int):
         """
@@ -177,7 +177,7 @@ class Stats:
             The maximum number of TV points that can be assigned to the specified stat.
         """
         return max(
-            MAX_TV_TOTAL - self.total_tvs,
+            TemTemConstants.MAX_TV_TOTAL - self.total_tvs,
             self.__stats[stat].available_tvs,
             0,
         )
@@ -256,10 +256,10 @@ class CompetitiveStats(Stats):
 
         """
         super().__init__(
-            base, SvsInitializer(default_value=MAX_SV), tvs
+            base, SvsInitializer(default_value=TemTemConstants.MAX_SV), tvs
         )
         assert (
-            self.total_tvs == MAX_TV_TOTAL
+            self.total_tvs == TemTemConstants.MAX_TV_TOTAL
         ), f"In competitive play we expect max TVs. You've passed in {self.total_tvs}."
 
 
@@ -274,7 +274,7 @@ class RandomStats(Stats):
         base: BaseValueInitializer,
         tvs: TvsInitializer = TvsInitializer(
             values=rand_values_dict_max_sum(
-                Stat.to_list(), MAX_TV_TOTAL, MAX_TV
+                Stat.to_list(), TemTemConstants.MAX_TV_TOTAL, TemTemConstants.MAX_TV
             )
         ),
     ) -> None:
