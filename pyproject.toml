@@ -1,2 +1,6 @@
 [tool.pylint.messages_control]
-disable = ["C0111", "C0116", "C0115", "C0114"] # ignorig docstrings for now
+disable = [
+    "C0111", "C0116", "C0115", "C0114" # ignorig docstrings for now
+    , "W0511" # ignoring TODO for now, because we're developing
+    , "W0238" # ignoring unused-private-member for now, because we're developing
+]
