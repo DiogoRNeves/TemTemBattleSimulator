@@ -193,21 +193,23 @@ class Technique:
         - AssertionError: If the specified technique name is not found in the list of techniques.
         """
         lookup_name: str = name.lower()
-        assert lookup_name in _techniques.keys(), f"Technique not found: {name}"
-        t = _techniques[lookup_name]
-        self.__name: str = t["name"]
-        self.__damage: int = t["damage"]
-        self.__type: TemTemType = TemTemType.from_string(t["type"])
-        self.__stamina_cost: int = t["staminaCost"]
-        self.__hold: int = t["hold"]
+        assert lookup_name in _techniques, f"Technique not found: {name}"
+        technique_data = _techniques[lookup_name]
+        self.__name: str = technique_data["name"]
+        self.__damage: int = technique_data["damage"]
+        self.__type: TemTemType = TemTemType.from_string(technique_data["type"])
+        self.__stamina_cost: int = technique_data["staminaCost"]
+        self.__hold: int = technique_data["hold"]
         self.__held: int = 0
-        self.__priority: TechniquePriority = TechniquePriority.from_string(t["priority"])
-        self.__targets: TechniqueTargets = TechniqueTargets.from_string(t["targets"])
-        self.__class = TechniqueClass.from_string(t["class"])
+        self.__priority: TechniquePriority = TechniquePriority.from_string(
+            technique_data["priority"]
+        )
+        self.__targets: TechniqueTargets = TechniqueTargets.from_string(technique_data["targets"])
+        self.__class = TechniqueClass.from_string(technique_data["class"])
 
     @staticmethod
     def get_random_technique(
-        classes: Iterable[TechniqueClass] = TechniqueClass, *type: TemTemType
+        *temtem_type: TemTemType, classes: Iterable[TechniqueClass] = TechniqueClass
     ) -> Technique:
         """
         Returns a randomly chosen technique that matches the specified classes and types.
@@ -224,7 +226,7 @@ class Technique:
             t
             for t in _techniques.keys()
             if (
-                len(type) == 0 or TemTemType.from_string(_techniques[t]["type"]) in type
+                len(temtem_type) == 0 or TemTemType.from_string(_techniques[t]["type"]) in temtem_type
             )
             and TechniqueClass.from_string(_techniques[t]["class"]) in classes
         ]

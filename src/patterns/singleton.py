@@ -1,4 +1,5 @@
 import threading
+from typing import Type
 
 class Singleton(type):
     _instances = {}
@@ -8,19 +9,19 @@ class Singleton(type):
         return cls._instances[cls]
 
 # https://old.reddit.com/r/Python/comments/2qkwgh/class_to_enforce_singleton_pattern_on_subclasses/
-def singleton(theclass):
+def singleton(theclass: Type[object]) -> Type[object]:
     # Assumes that theclass doesn't define a __new__ method.
     # Defining __init__ is okay though.
-    theclass._instance = None
+    theclass.instance = None
     lock = threading.Lock()
     def __new__(cls, *args, **kwargs):
         with lock:
-            if cls._instance is None:
+            if cls.instance is None:
                 if theclass.__base__ is object:
                     obj = super(theclass, cls).__new__(cls, None)
                 else:
                     obj = super(theclass, cls).__new__(cls, *args, **kwargs)
-                cls._instance = obj
-            return cls._instance
+                cls.instance = obj
+            return cls.instance
     theclass.__new__ = __new__
     return theclass

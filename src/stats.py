@@ -63,7 +63,7 @@ def array_sum(n: int, s: int, m: int) -> list[int]:
     return result
 
 
-def rand_values_dict_max_sum(keys: list[U], sum: int, max_element: int) -> dict[U, int]:
+def rand_values_dict_max_sum(keys: list[U], intendd_sum: int, max_element: int) -> dict[U, int]:
     """
     Returns a dictionary with random values as the values and the given keys as the keys. The sum of the values in
     the dictionary is equal to the given sum, and each value is less than or equal to the given max element.
@@ -78,7 +78,7 @@ def rand_values_dict_max_sum(keys: list[U], sum: int, max_element: int) -> dict[
     """
 
     # Generate a list of random values that add up to the desired sum
-    vals = array_sum(len(keys), sum, max_element)
+    vals = array_sum(len(keys), intendd_sum, max_element)
 
     # Create a dictionary with the given keys and the random values
     return {keys[i]: vals[i] for i in range(len(keys))}

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 from abc import ABC
-from typing import Callable, Mapping
+from typing import Callable, Mapping, Optional
 
 import src.tem_tem_constants as TemTemConstants
 from src.tem_stat import Stat
@@ -12,8 +12,8 @@ class StatsInitializer(ABC, Mapping):
     """Class representing a set of initial stat values for a Temtem."""
     def __init__(
         self,
-        min: int,
-        max: int,
+        min_stat: int,
+        max_stat: int,
         values: dict[Stat, int],
         default_value: int | Callable[[int, int], int],
     ) -> None:
@@ -39,14 +39,14 @@ class StatsInitializer(ABC, Mapping):
         t = {
             stat: values.get(
                 stat,
-                default_value(min, max) if callable(default_value) else default_value,
+                default_value(min_stat, max_stat) if callable(default_value) else default_value,
             )
             for stat in Stat
         }
         for val in t.values():
             assert (
-                val >= min and val <= max
-            ), f"Stat of {val} not allowed. Must be between {min} and {max}."
+                val >= min_stat and val <= max_stat
+            ), f"Stat of {val} not allowed. Must be between {min_stat} and {max_stat}."
 
         self._values = t
 
@@ -85,7 +85,7 @@ class SvsInitializer(StatsInitializer):
     """A class representing the initial values for a Temtem's SVs (single values)."""
     def __init__(
         self,
-        values: dict[Stat, int] = {},
+        values: Optional[dict[Stat, int]] = None,
         default_value: int | Callable[[int, int], int] = random.randint,
     ) -> None:
         """
@@ -96,6 +96,9 @@ class SvsInitializer(StatsInitializer):
         - default_value (int | Callable[[int, int], int]): A default value to use for any missing Stat.
             It can be either a fixed value or a callable that takes the min and max possible values as arguments.
         """
+        if values is None:
+            values = {}
+
         super().__init__(TemTemConstants.MIN_SV, TemTemConstants.MAX_SV, values, default_value)
 
 
@@ -103,7 +106,7 @@ class TvsInitializer(StatsInitializer):
     """A class representing the initial values for a Temtem's TVs (training values)."""
     def __init__(
         self,
-        values: dict[Stat, int] = {},
+        values: Optional[dict[Stat, int]] = None,
         default_value: int = 0,
     ) -> None:
         """
@@ -118,6 +121,9 @@ class TvsInitializer(StatsInitializer):
             Checks if the total value of all stats is less than or equal to the given max_total.
             Returns True if it is, False otherwise.
         """
+        if values is None:
+            values = {}
+
         super().__init__(TemTemConstants.MIN_TV, TemTemConstants.MAX_TV, values, default_value)
 
     def is_ok(self, max_total: int) -> bool:

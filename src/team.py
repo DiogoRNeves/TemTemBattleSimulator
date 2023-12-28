@@ -39,13 +39,13 @@ class Team(ABC):
             )
 
         if tem in self.__tems:
-            raise ValueError(f"Cannot add Tem to team - Tem already in team.")
+            raise ValueError(f"Cannot add Tem to team - Tem already in team: {tem.display_name=}")
 
         self.__tems.append(tem)
 
     def remove(self, tem: Tem):
         if tem not in self.__tems:
-            raise ValueError(f"Cannot remove Tem from team - Tem not in team.")
+            raise ValueError(f"Cannot remove Tem from team - Tem not in team: {tem.display_name=}")
 
         self.__tems.remove(tem)
 

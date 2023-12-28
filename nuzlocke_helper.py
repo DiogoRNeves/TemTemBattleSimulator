@@ -33,11 +33,11 @@ def get_json(path: str) -> Any:
 CONFIGS_PATH: Final[str] = "./nuzlocke_helper_configs"
 
 my_team_config: list[ConfigTem] = get_json(CONFIGS_PATH + "/my_team.json")
-assert isinstance(my_team_config, Iterable), f"json for my_teams must be an Iterable."
+assert isinstance(my_team_config, Iterable), "json for my_teams must be an Iterable."
 opponent_tems_config: list[ConfigTem] = get_json(CONFIGS_PATH + "/opponent_tems.json")
 assert isinstance(
     opponent_tems_config, Iterable
-), f"json for opponent_tems must be an Iterable."
+), "json for opponent_tems must be an Iterable."
 
 
 my_team = PlaythroughTeam(

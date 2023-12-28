@@ -6,7 +6,8 @@ from src.battle_team import TeamBattlePosition, Teams
 from src.technique import Technique
 
 class Item:
-    pass
+    def __init__(self) -> None:
+        raise NotImplementedError
 
 TechOrItem = Technique | Item
 

@@ -37,7 +37,7 @@ class TemTemType(Enum):
         """
         return math.prod([self._get_multiplier(defender) for defender in defenders])
 
-    def _get_multiplier(self, defender: TemTemType) -> float:
+    def _get_multiplier(self, defender_tem: TemTemType) -> float:
         """Calculate the type multiplier of the attacker TemTemType against
         a single defender TemTemType.
 
@@ -49,10 +49,10 @@ class TemTemType(Enum):
         - float: The type multiplier of the attacker TemTemType against the
                  defender TemTemType.
         """
-        return _multipliers[self][defender]
+        return _multipliers[self][defender_tem]
 
     @staticmethod
-    def from_string(type: str) -> TemTemType:
+    def from_string(temtem_type: str) -> TemTemType:
         """Return the corresponding TemTemType enum value for the given
         type string.
 
@@ -62,7 +62,8 @@ class TemTemType(Enum):
         Returns:
         - TemTemType: The corresponding TemTemType enum value.
         """
-        return TemTemType.NO_TYPE if len(type) == 0 else TemTemType[type.upper()]
+        return TemTemType.NO_TYPE if len(temtem_type) == 0 \
+            else TemTemType[temtem_type.upper()]
 
     @staticmethod
     def get_random_type(*exclude_type: TemTemType) -> TemTemType:

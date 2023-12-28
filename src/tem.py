@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 from abc import ABC
-from typing import Callable, Type, final
+from typing import Callable, Optional, Type, final
 
 from typing_extensions import NotRequired, TypedDict
 from src.technique_set import BattleTechniques, LearnableTechniques
@@ -32,7 +32,7 @@ class TemSpecies(ABC):
     """Abstract base class for all TemTem species."""
 
     def __init__(
-        self, id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
+        self, species_id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
     ) -> None:
         """Create a new TemTem species.
 
@@ -45,9 +45,9 @@ class TemSpecies(ABC):
         - AssertionError: If the specified secondary type conflicts with the species' original secondary type.
         """
         super().__init__()
-        self._id = id
-        self._base = Tempedia.get_base_value_initializer(id)
-        self.__species_name = Tempedia.get_name(id)
+        self._id = species_id
+        self._base = Tempedia.get_base_value_initializer(species_id)
+        self.__species_name = Tempedia.get_name(species_id)
 
         if self.__species_name.lower() in TemTemConstants.MULTIPLE_SECONDARY_TYPE:
             assert (
@@ -58,7 +58,7 @@ class TemSpecies(ABC):
                 secondary_type == TemTemType.NO_TYPE
             ), f"{self.__species_name} does not have a variable secondary type."
 
-        t = Tempedia.get_types(id)
+        t = Tempedia.get_types(species_id)
         if secondary_type != TemTemType.NO_TYPE:
             assert (
                 t[1] == TemTemType.NO_TYPE
@@ -118,11 +118,11 @@ class TemSpecies(ABC):
 class Tem(TemSpecies):
     def __init__(
         self,
-        id: int,
+        species_id: int,
         stat_cls: Type[Stats],
-        battle_technique_names: list[str] = [],
-        tvs: TvsInitializer | None = None,
-        svs: SvsInitializer | None = None,
+        battle_technique_names: Optional[list[str]] = None,
+        tvs: Optional[TvsInitializer] = None,
+        svs: Optional[SvsInitializer] = None,
         level: int | Callable[[int, int], int] = random.randint,
         secondary_type: TemTemType = TemTemType.NO_TYPE,
         nickname: str = "",
@@ -133,7 +133,7 @@ class Tem(TemSpecies):
         Args:
         - id (int): The ID of the Tem species.
         - stat_cls (Type[Stats]): The class used to calculate the Tem's stats.
-        - battle_technique_names (list[str], optional): The technique names to consider as battle ready. If none is passed we'll give the last 4 moves it can learn,
+        - battle_technique_names (list[str], optional): The technique names to consider as battle ready. If none is passed we'll give the last 4 moves it can learn.
         - tvs (TvsInitializer | None, optional): The Tem's TV stats. Defaults to None.
         - svs (SvsInitializer | None, optional): The Tem's SV stats. Defaults to None.
         - level (int | Callable[[int, int], int], optional): The Tem's level or a callable function to generate it. Defaults to random.randint.
@@ -143,9 +143,12 @@ class Tem(TemSpecies):
         Returns:
         - None
         """
-        kwargs: TemSpeciesArg = {"id": id}
+        if battle_technique_names is None:
+            battle_technique_names = []
 
-        if Tempedia.get_name(id).lower() in TemTemConstants.MULTIPLE_SECONDARY_TYPE:
+        kwargs: TemSpeciesArg = {"species_id": species_id}
+
+        if Tempedia.get_name(species_id).lower() in TemTemConstants.MULTIPLE_SECONDARY_TYPE:
             if secondary_type == TemTemType.NO_TYPE:
                 secondary_type = TemTemType.get_random_type(secondary_type)
             kwargs["secondary_type"] = secondary_type
@@ -177,7 +180,7 @@ class Tem(TemSpecies):
 
     @classmethod
     def from_random_encounter(
-        cls, id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
+        cls, species_id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
     ) -> Tem:
         """
         Creates a new Tem with random encounter stats.
@@ -189,11 +192,11 @@ class Tem(TemSpecies):
         Returns:
         - Tem: The newly created Tem.
         """
-        return cls(id, RandomEncounterStats, secondary_type=secondary_type)
+        return cls(species_id, RandomEncounterStats, secondary_type=secondary_type)
 
     @classmethod
     def from_random_stats(
-        cls, id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
+        cls, species_id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
     ) -> Tem:
         """
         Creates a new Tem with random stats.
@@ -205,12 +208,12 @@ class Tem(TemSpecies):
         Returns:
         - Tem: The newly created Tem.
         """
-        return cls(id, RandomStats, secondary_type=secondary_type)
+        return cls(species_id, RandomStats, secondary_type=secondary_type)
 
     @classmethod
     def from_competitive(
         cls,
-        id: int,
+        species_id: int,
         tvs: TvsInitializer,
         level=100,
         secondary_type: TemTemType = TemTemType.NO_TYPE,
@@ -228,13 +231,13 @@ class Tem(TemSpecies):
         - Tem: The newly created Tem.
         """
         return cls(
-            id, CompetitiveStats, tvs=tvs, level=level, secondary_type=secondary_type
+            species_id, CompetitiveStats, tvs=tvs, level=level, secondary_type=secondary_type
         )
 
     @classmethod
     def from_custom(
         cls,
-        id: int,
+        species_id: int,
         tvs: TvsInitializer,
         svs: SvsInitializer,
         level: int,
@@ -256,7 +259,7 @@ class Tem(TemSpecies):
         - Tem: The custom TemTem instance.
         """
         return cls(
-            id,
+            species_id,
             Stats,
             tvs=tvs,
             svs=svs,
@@ -271,8 +274,8 @@ class Tem(TemSpecies):
         cls,
         name: str,
         battle_techniques: list[str],
-        svs: list[int] = [],
-        tvs: list[int] = [],
+        svs: Optional[list[int]] = None,
+        tvs: Optional[list[int]] = None,
         level: int = random.randint(
             TemTemConstants.TEM_MIN_LEVEL, TemTemConstants.TEM_MAX_LEVEL
         ),
@@ -292,7 +295,13 @@ class Tem(TemSpecies):
         Returns:
         - Tem: The custom TemTem instance.
         """
-        id = Tempedia.get_id_from_name(name)
+        if svs is None:
+            svs = []
+
+        if tvs is None:
+            tvs = []
+
+        species_id = Tempedia.get_id_from_name(name)
         assert len(svs) in [
             0,
             len(Stat),
@@ -309,7 +318,7 @@ class Tem(TemSpecies):
         )
 
         return cls.from_custom(
-            id, tvs_init, svs_init, level, battle_techniques, secondary_type, nickname
+            species_id, tvs_init, svs_init, level, battle_techniques, secondary_type, nickname
         )
 
     @property
@@ -350,14 +359,14 @@ class Tem(TemSpecies):
         return self.__nickname
 
     @nickname.setter
-    def nickname(self, n: str):
+    def nickname(self, nckname: str):
         """
         Set the nickname of the TemTem.
 
         Args:
         - n (str): The new nickname for the TemTem.
         """
-        self.__nickname = n
+        self.__nickname = nckname
 
     @property
     def level(self) -> int:
@@ -403,7 +412,7 @@ class Tem(TemSpecies):
         """
         return self.__stats.tvs
 
-    def _get_type_multiplier(self, attaking_type: TemTemType) -> float:
+    def _get_type_multiplier(self, attacking_type: TemTemType) -> float:
         """
         Get the type multiplier for the TemTem based on the attacking type.
 
@@ -413,7 +422,7 @@ class Tem(TemSpecies):
         Returns:
         - float: The type multiplier for the TemTem.
         """
-        return attaking_type.get_multiplier(*self.types)
+        return attacking_type.get_multiplier(*self.types)
 
     def level_up(self, levels: int = 1):
         """
@@ -494,20 +503,21 @@ class Tem(TemSpecies):
 if __name__ == "__main__":
 
     from icecream import ic
+    from typing import Final
 
-    n = Tempedia.size()
-    t_enc = Tem.from_random_encounter(id=random.randint(1, n))
-    t_rand = Tem.from_random_stats(id=random.randint(1, n))
+    NUMBER_OF_TEMTEMS: Final[int] = Tempedia.size()
+    t_enc = Tem.from_random_encounter(species_id=random.randint(1, NUMBER_OF_TEMTEMS))
+    t_rand = Tem.from_random_stats(species_id=random.randint(1, NUMBER_OF_TEMTEMS))
     t_comp = Tem.from_competitive(
-        id=Tempedia.get_id_from_name("hedgine"),
+        species_id=Tempedia.get_id_from_name("hedgine"),
         tvs=TvsInitializer({Stat.SPD: 500, Stat.SPATK: 500}),
     )
-    koish = Tem.from_random_encounter(id=143)
-    chromeon = Tem.from_random_encounter(id=4, secondary_type=TemTemType.DIGITAL)
+    koish = Tem.from_random_encounter(species_id=143)
+    chromeon = Tem.from_random_encounter(species_id=4, secondary_type=TemTemType.DIGITAL)
 
     ic(t_enc, t_rand, t_comp, koish, chromeon)
 
-    effectiveness = {tp: t_rand._get_type_multiplier(tp) for tp in TemTemType}
+    effectiveness = {tp: tp.get_multiplier(*t_rand.types) for tp in TemTemType}
     ic(t_rand.species_name, t_rand.types, effectiveness)
 
     tech = Technique.get_random_technique(
