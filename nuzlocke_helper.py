@@ -44,7 +44,11 @@ my_team = PlaythroughTeam(
     [
         Tem.from_data(
             name=d["name"],
-            svs=d.get("svs", [random.randint(TemTemConstants.MIN_SV,TemTemConstants.MAX_SV) for _ in range(len(Stat))]),
+            svs=d.get("svs", [
+                random.randint(TemTemConstants.MIN_SV,TemTemConstants.MAX_SV)
+                    for _ in range(len(Stat))
+                ]
+            ),
             tvs=d.get("tvs", [0] * len(Stat)),
             level=d["level"],
             battle_techniques=d["techniques"],
@@ -103,7 +107,8 @@ if __name__ == "__main__":
         required=False,
         type=custom_opponent_tem,
         nargs="+",
-        help="A list of custom opponent tems, having the form [TemSpeciesName],[level]. For example: Sparzy,16",
+        help="A list of custom opponent tems, having the form [TemSpeciesName],[level]. " + \
+            "For example: Sparzy,16",
     )
     opponents_group.add_argument(
         "--dojo_leader",
@@ -165,7 +170,8 @@ if __name__ == "__main__":
 
             assert (
                 opponent_max_sv.display_name == opponent_min_sv.display_name
-            ), f"max_sv and min_sv tems must have the same display name: {opponent_min_sv.display_name=} {opponent_max_sv.display_name=}"
+            ), "max_sv and min_sv tems must have the same display name: " + \
+                f"{opponent_min_sv.display_name=} {opponent_max_sv.display_name=}"
             attacker_text = f"\t-> {opponent_max_sv.display_name}"
             print(attacker_text)
 
@@ -187,7 +193,8 @@ if __name__ == "__main__":
 
                 assert (
                     min_dmg_percent <= max_dmg_percent
-                ), f"min damage must be lower than max damage: {min_dmg_percent=} {max_dmg_percent=}"
+                ), "min damage must be lower than max damage: " + \
+                    f"{min_dmg_percent=} {max_dmg_percent=}"
 
                 # to % string
                 min_dmg_percent_str = f"{min_dmg_percent * 100} %"

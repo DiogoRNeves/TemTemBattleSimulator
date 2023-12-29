@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 from abc import ABC
-from typing import Callable, Optional, Type, final
+from typing import Callable, Optional, Self, Type, final
 
 from typing_extensions import NotRequired, TypedDict
 from src.technique_set import BattleTechniques, LearnableTechniques
@@ -38,11 +38,14 @@ class TemSpecies(ABC):
 
         Args:
         - id (int): The species ID.
-        - secondary_type (str or TemTemType, optional): The species' secondary type. Defaults to TemTemType.NO_TYPE.
+        - secondary_type (str or TemTemType, optional): The species' secondary type.
+            Defaults to TemTemType.NO_TYPE.
 
         Raises:
-        - AssertionError: If the species has a variable secondary type that is not specified, or if the species does not have a variable secondary type and one is specified.
-        - AssertionError: If the specified secondary type conflicts with the species' original secondary type.
+        - AssertionError: If the species has a variable secondary type that is not specified,
+            or if the species does not have a variable secondary type and one is specified.
+        - AssertionError: If the specified secondary type conflicts with the species'
+            original secondary type.
         """
         super().__init__()
         self._id = species_id
@@ -133,11 +136,14 @@ class Tem(TemSpecies):
         Args:
         - id (int): The ID of the Tem species.
         - stat_cls (Type[Stats]): The class used to calculate the Tem's stats.
-        - battle_technique_names (list[str], optional): The technique names to consider as battle ready. If none is passed we'll give the last 4 moves it can learn.
+        - battle_technique_names (list[str], optional): The technique names to consider as
+            battle ready. If none is passed we'll give the last 4 moves it can learn.
         - tvs (TvsInitializer | None, optional): The Tem's TV stats. Defaults to None.
         - svs (SvsInitializer | None, optional): The Tem's SV stats. Defaults to None.
-        - level (int | Callable[[int, int], int], optional): The Tem's level or a callable function to generate it. Defaults to random.randint.
-        - secondary_type (TemTemType, optional): The Tem's secondary type. Defaults to TemTemType.NO_TYPE.
+        - level (int | Callable[[int, int], int], optional): The Tem's level or a callable
+            function to generate it. Defaults to random.randint.
+        - secondary_type (TemTemType, optional): The Tem's secondary type.
+            Defaults to TemTemType.NO_TYPE.
         - nickname (str, optional): The Tem's nickname. Defaults to "".
 
         Returns:
@@ -174,20 +180,20 @@ class Tem(TemSpecies):
         self.__battle_techniques = BattleTechniques(battle_technique_names)
 
         assert (
-            self.__level >= TemTemConstants.TEM_MIN_LEVEL
-            and self.__level <= TemTemConstants.TEM_MAX_LEVEL
+            TemTemConstants.TEM_MIN_LEVEL <= self.__level <= TemTemConstants.TEM_MAX_LEVEL
         ), f"Level {level} is not allowed."
 
     @classmethod
     def from_random_encounter(
         cls, species_id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
-    ) -> Tem:
+    ) -> Self:
         """
         Creates a new Tem with random encounter stats.
 
         Args:
         - id (int): The ID of the Tem species.
-        - secondary_type (TemTemType, optional): The Tem's secondary type. Defaults to TemTemType.NO_TYPE.
+        - secondary_type (TemTemType, optional): The Tem's secondary type.
+            Defaults to TemTemType.NO_TYPE.
 
         Returns:
         - Tem: The newly created Tem.
@@ -197,13 +203,14 @@ class Tem(TemSpecies):
     @classmethod
     def from_random_stats(
         cls, species_id: int, secondary_type: TemTemType = TemTemType.NO_TYPE
-    ) -> Tem:
+    ) -> Self:
         """
         Creates a new Tem with random stats.
 
         Args:
         - id (int): The ID of the Tem species.
-        - secondary_type (TemTemType, optional): The Tem's secondary type. Defaults to TemTemType.NO_TYPE.
+        - secondary_type (TemTemType, optional): The Tem's secondary type.
+            Defaults to TemTemType.NO_TYPE.
 
         Returns:
         - Tem: The newly created Tem.
@@ -217,7 +224,7 @@ class Tem(TemSpecies):
         tvs: TvsInitializer,
         level=100,
         secondary_type: TemTemType = TemTemType.NO_TYPE,
-    ) -> Tem:
+    ) -> Self:
         """
         Creates a new Tem with competitive stats.
 
@@ -225,7 +232,8 @@ class Tem(TemSpecies):
         - id (int): The ID of the Tem species.
         - tvs (TvsInitializer): The Tem's TV stats.
         - level (int, optional): The Tem's level. Defaults to 100.
-        - secondary_type (TemTemType, optional): The Tem's secondary type. Defaults to TemTemType.NO_TYPE.
+        - secondary_type (TemTemType, optional): The Tem's secondary type.
+            Defaults to TemTemType.NO_TYPE.
 
         Returns:
         - Tem: The newly created Tem.
@@ -244,7 +252,7 @@ class Tem(TemSpecies):
         battle_techniques: list[str],
         secondary_type: TemTemType = TemTemType.NO_TYPE,
         nickname: str = "",
-    ) -> Tem:
+    ) -> Self:
         """
         Create a custom TemTem instance with specific TV, SV, and level.
 
@@ -253,7 +261,8 @@ class Tem(TemSpecies):
         - tvs (TvsInitializer): The TV values for the TemTem.
         - svs (SvsInitializer): The SV values for the TemTem.
         - level (int): The level of the TemTem.
-        - secondary_type (TemTemType, optional): The secondary type of the TemTem. Defaults to TemTemType.NO_TYPE.
+        - secondary_type (TemTemType, optional): The secondary type of the TemTem.
+            Defaults to TemTemType.NO_TYPE.
 
         Returns:
         - Tem: The custom TemTem instance.
@@ -281,7 +290,7 @@ class Tem(TemSpecies):
         ),
         secondary_type: TemTemType = TemTemType.NO_TYPE,
         nickname: str = "",
-    ) -> Tem:
+    ) -> Self:
         """
         Create a custom TemTem instance from raw data.
 
@@ -290,7 +299,8 @@ class Tem(TemSpecies):
         - svs (list[int], optional): The SV values for the TemTem. Defaults to [].
         - tvs (list[int], optional): The TV values for the TemTem. Defaults to [].
         - level (int, optional): The level of the TemTem. Defaults to random.
-        - secondary_type (TemTemType, optional): The secondary type of the TemTem. Defaults to TemTemType.NO_TYPE.
+        - secondary_type (TemTemType, optional): The secondary type of the TemTem.
+            Defaults to TemTemType.NO_TYPE.
 
         Returns:
         - Tem: The custom TemTem instance.
@@ -484,7 +494,8 @@ class Tem(TemSpecies):
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of the Tem, including its name, types, level, stats, svs, and tvs.
+        Returns a string representation of the Tem, including its name, types,
+            level, stats, svs, and tvs.
 
         Returns:
         - str: A string representation of the Tem.

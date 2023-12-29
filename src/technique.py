@@ -138,7 +138,8 @@ class TechniqueTargets(Enum):
 
 
 # ic| k: 'priority'
-# set([t[k] for t in _techniques.values()]): {'low', 'veryhigh', 'high', 'normal', 'verylow', 'ultra'}
+# set([t[k] for t in _techniques.values()]):
+#   {'low', 'veryhigh', 'high', 'normal', 'verylow', 'ultra'}
 
 
 class TechniquePriority(Enum):
@@ -223,12 +224,12 @@ class Technique:
 
         """
         names = [
-            t
-            for t in _techniques.keys()
+            tech_name
+            for tech_name, tech in _techniques.items()
             if (
-                len(temtem_type) == 0 or TemTemType.from_string(_techniques[t]["type"]) in temtem_type
+                len(temtem_type) == 0 or TemTemType.from_string(tech["type"]) in temtem_type
             )
-            and TechniqueClass.from_string(_techniques[t]["class"]) in classes
+            and TechniqueClass.from_string(tech["class"]) in classes
         ]
         rand_name = random.choice(names)
         return Technique(rand_name)

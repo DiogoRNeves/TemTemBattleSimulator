@@ -31,7 +31,8 @@ class Tempedia():
     @staticmethod
     def get_base_value_initializer(species_id: int) -> BaseValueInitializer:
         """
-        Returns a new BaseValueInitializer object that initializes the base values of a temtem with the given id.
+        Returns a new BaseValueInitializer object that initializes the base values
+            of a temtem with the given id.
 
         Args:
         - id (int): The id of the temtem.
@@ -50,7 +51,8 @@ class Tempedia():
         Returns a random id of a temtem that satisfies the given filter.
 
         Args:
-        - fltr (Callable[[Tuple[int, TemTemJson]], bool]): A function that returns True for temtems that should be considered.
+        - fltr (Callable[[Tuple[int, TemTemJson]], bool]): A function that
+            returns True for temtems that should be considered.
 
         Returns:
         - int: A random id of a temtem that satisfies the given filter.
@@ -153,7 +155,12 @@ class Tempedia():
         # always return at least one technique name
         max_number_of_techniques = max(1, max_number_of_techniques)
 
-        techs = list(filter(lambda t: t.get("levels", level + 1) <= level, _tems[tem_id]["techniques"] ))
+        techs = list(
+            filter(
+                lambda t: t.get("levels", level + 1) <= level,
+                _tems[tem_id]["techniques"]
+            )
+        )
         techs.sort(key=lambda t: t.get("levels", 0), reverse=True)
 
         return [t["name"] for t in techs[:max_number_of_techniques]]

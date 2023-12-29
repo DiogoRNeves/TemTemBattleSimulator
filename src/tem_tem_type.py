@@ -105,7 +105,8 @@ class TemType:
 
         Args:
         - primary_type (TemTemType): The primary type of the TemType.
-        - secondary_type (TemTemType, optional): The secondary type of the TemType. Defaults to TemTemType.NO_TYPE.
+        - secondary_type (TemTemType, optional): The secondary type of the TemType.
+            Defaults to TemTemType.NO_TYPE.
 
         Raises:
         - AssertionError: If the primary_type is TemTemType.NO_TYPE.
@@ -174,7 +175,7 @@ if __name__ == "__main__":
         for attacker in TemTemType
     }
 
-    count = 0
+    count: int = 0
     for atacker, val1 in effectiveness_table.items():
         for defender1, val2 in val1.items():
             for defender2, multiplier in val2.items():

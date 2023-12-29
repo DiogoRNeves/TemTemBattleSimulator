@@ -14,7 +14,7 @@ class TechniqueSet(ABC):
         assert (
             len(techniques_set) > 0
         ), f"Must pass in at least one technique: {len(techniques_set)=} {techniques_set=}"
-        self.__MAX_SET_SIZE: Final[int] = max_set_size
+        self.__max_set_size: Final[int] = max_set_size
         self._techniques: list[Technique] = [Technique(t) for t in techniques_set]
 
     @property
@@ -23,8 +23,8 @@ class TechniqueSet(ABC):
 
     def add(self, technique: str):
         assert (
-            len(self) < self.__MAX_SET_SIZE
-        ), f"Can't add technique, set is already full: {len(self)=} {self.__MAX_SET_SIZE=}"
+            len(self) < self.__max_set_size
+        ), f"Can't add technique, set is already full: {len(self)=} {self.__max_set_size=}"
         assert (
             technique not in self.names
         ), f"Can't add technique - it already exists in the set: {technique=} {self.names=}"
@@ -53,7 +53,8 @@ class TechniqueSet(ABC):
     ) -> list[Technique]:
         """
         Gets random techniques from the set, with an optional filter.
-        If more than the available number of available techniques is requested, all techniques will be returned.
+        If more than the available number of available techniques is requested,
+            all techniques will be returned.
         """
         assert (
             number_of_techniques > 0

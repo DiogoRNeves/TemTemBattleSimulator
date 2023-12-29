@@ -20,7 +20,7 @@ class Team(ABC):
             0 <list_size <= max_team_size
         ), f"Invalid team size: {list_size}"
 
-        self.__MAX_TEAM_SIZE: Final[int] = max_team_size
+        self.__max_team_size: Final[int] = max_team_size
         self.__tems = tem_list
 
     def add(self, tem: Tem):
@@ -31,11 +31,12 @@ class Team(ABC):
         - tem (Tem): The Tem object to add to the team.
 
         Raises:
-        - ValueError: If the team is already at its maximum size or if the Tem object is already in the team.
+        - ValueError: If the team is already at its maximum size or if the Tem object
+            is already in the team.
         """
-        if len(self.__tems) == self.__MAX_TEAM_SIZE:
+        if len(self.__tems) == self.__max_team_size:
             raise ValueError(
-                f"Cannot add Tem to team - team already has maximum size of {self.__MAX_TEAM_SIZE}."
+                f"Cannot add Tem to team - team already has maximum size of {self.__max_team_size}."
             )
 
         if tem in self.__tems:
@@ -60,7 +61,8 @@ class Team(ABC):
         - Tem: The Tem object with the specified species name or nickname.
 
         Raises:
-        - KeyError: If there is no Tem object with the specified species name or nickname in the team.
+        - KeyError: If there is no Tem object with the specified species
+            name or nickname in the team.
         """
 
         for t in self.__tems:
@@ -94,10 +96,13 @@ class Team(ABC):
         return self.__tems.__iter__()
 
     def __repr__(self):
-        return [f"level {t.level} {t.display_name} with techs: {[tech.name for tech in t.battle_techniques]}" for t in self].__repr__()
+        return [
+            f"level {t.level} {t.display_name} with techs:" + \
+                f"{t.battle_techniques.names}" for t in self
+        ].__repr__()
 
 
-TTeam = TypeVar('TTeam', bound=Team)
+TeamT = TypeVar('TeamT', bound=Team)
 
 class CompetitiveTeam(Team):
     """A class representing a team used in a competitive battle"""

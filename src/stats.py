@@ -23,7 +23,8 @@ def array_sum(n: int, s: int, m: int) -> list[int]:
         m (int): Maximum possible integer value for the elements of the list to be generated.
 
     Returns:
-        list[int]: A list of n random integers between 1 and m that sum up to s or as close as possible.
+        list[int]: A list of n random integers between 1 and m that sum up to s
+            or as close as possible.
 
     Raises:
         AssertionError: If the provided inputs violate the following condition:
@@ -51,10 +52,12 @@ def array_sum(n: int, s: int, m: int) -> list[int]:
         # Get the current value of the element at index j
         current = result[j]
 
-        # Generate a random integer between 1 and the remaining amount needed to reach the desired sum or m, whichever is smaller
+        # Generate a random integer between 1 and the remaining amount needed to reach
+        # the desired sum or m, whichever is smaller
         v = random.randint(1, min(m, s - sum(result)))
 
-        # Set the new value of the element at index j to be the minimum of the random value v + the current value and m
+        # Set the new value of the element at index j to be the minimum of the random
+        # value v + the current value and m
         result[j] = min(v + current, m)
 
         # Remove index j from the not_maxed list if the new value of the element is equal to m
@@ -66,8 +69,9 @@ def array_sum(n: int, s: int, m: int) -> list[int]:
 
 def rand_values_dict_max_sum(keys: list[U], intendd_sum: int, max_element: int) -> dict[U, int]:
     """
-    Returns a dictionary with random values as the values and the given keys as the keys. The sum of the values in
-    the dictionary is equal to the given sum, and each value is less than or equal to the given max element.
+    Returns a dictionary with random values as the values and the given keys as the keys.
+    The sum of the values in the dictionary is equal to the given sum, and each value is
+    less than or equal to the given max element.
 
     Args:
         keys (list[U]) List of keys to use for the dictionary.
@@ -249,8 +253,10 @@ class CompetitiveStats(Stats):
         that has the sum of its values bounded by the maximum allowed TV value.
 
         Args:
-            base (BaseValueInitializer): A dictionary that contains the initial values of the TemTem's base stats.
-            tvs (TvsInitializer): A dictionary that contains the initial values of the TemTem's Tvs.
+            base (BaseValueInitializer): A dictionary that contains the initial
+                values of the TemTem's base stats.
+            tvs (TvsInitializer): A dictionary that contains the initial values of
+                the TemTem's Tvs.
 
         Raises:
             AssertionError: If the total number of Tvs is not the maximum allowed TV value.
@@ -280,13 +286,19 @@ class RandomStats(Stats):
         ),
     ) -> None:
         """
-        Inherits from Stats and initializes SvsInitializer with default value of 0 and TvsInitializer with random values.
+        Inherits from Stats and initializes SvsInitializer with default value
+        of 0 and TvsInitializer with random values.
 
         Args:
-            base (BaseValueInitializer): BaseValueInitializer object representing the Temtem's base values.
-            tvs (TvsInitializer, optional): TvsInitializer object representing the Temtem's trained values. Defaults to TvsInitializer(values=rand_values_dict_max_sum(Stat.to_list(), MAX_TV_TOTAL, MAX_TV)).
-
-
+            base (BaseValueInitializer): BaseValueInitializer object representing
+                the Temtem's base values.
+            tvs (TvsInitializer, optional): TvsInitializer object representing the
+                Temtem's trained values. Defaults to
+                TvsInitializer(
+                    values=rand_values_dict_max_sum(
+                        Stat.to_list(), MAX_TV_TOTAL, MAX_TV
+                    )
+                ).
         """
         super().__init__(base, SvsInitializer(), tvs)
 
@@ -302,7 +314,8 @@ class RandomEncounterStats(RandomStats):
         Inherits from RandomStats and initializes TvsInitializer with default value of 0.
 
         Args:
-            base (BaseValueInitializer): BaseValueInitializer object representing the Temtem's base values.
+            base (BaseValueInitializer): BaseValueInitializer object representing the
+                Temtem's base values.
 
         """
         super().__init__(base, tvs=TvsInitializer())

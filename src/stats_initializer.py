@@ -24,10 +24,10 @@ class StatsInitializer(ABC, Mapping):
         - min (int): The minimum value allowed for the stats.
         - max (int): The maximum value allowed for the stats.
         - values (dict[Stat, int]): A dictionary containing the initial values of each stat.
-        - default_value (int | Callable[[int, int], int]): The default value for any stat that is not defined in
-            the 'values' parameter. If an integer is provided, the same value will be used for all undefined stats.
-            If a callable is provided, it will be called with 'min' and 'max' as arguments to calculate the default
-            value for each undefined stat.
+        - default_value (int | Callable[[int, int], int]): The default value for any stat that
+            is not defined in the 'values' parameter. If an integer is provided, the same value
+            will be used for all undefined stats. If a callable is provided, it will be called with
+            'min' and 'max' as arguments to calculate the default value for each undefined stat.
 
         Raises:
         - AssertionError: If any of the initial values is not within the specified range.
@@ -93,8 +93,9 @@ class SvsInitializer(StatsInitializer):
 
         Args:
         - values (dict[Stat, int]): A dictionary with the desired values for each Stat.
-        - default_value (int | Callable[[int, int], int]): A default value to use for any missing Stat.
-            It can be either a fixed value or a callable that takes the min and max possible values as arguments.
+        - default_value (int | Callable[[int, int], int]): A default value to use for
+            any missing Stat. It can be either a fixed value or a callable that takes
+            the min and max possible values as arguments.
         """
         if values is None:
             values = {}
@@ -134,7 +135,8 @@ class TvsInitializer(StatsInitializer):
         - max_total (int): The maximum total value allowed.
 
         Returns:
-        - bool: True if the total value of all stats is less than or equal to max_total, False otherwise.
+        - bool: True if the total value of all stats is less than or equal to max_total,
+            False otherwise.
         """
         return sum((i for i in self._values.values())) <= max_total
 
