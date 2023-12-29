@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dataclasses import dataclass, field
 
 import random
 from abc import ABC
@@ -24,7 +25,7 @@ from src.tem_tem_type import TemTemType, TemType
 
 
 class TemSpeciesArg(TypedDict):
-    id: int
+    species_id: int
     secondary_type: NotRequired[TemTemType]
 
 
@@ -117,71 +118,133 @@ class TemSpecies(ABC):
             )
         )
 
+@dataclass(frozen=True)
+class SpeciesIdentifier():
+    species_id: int
+
+    @classmethod
+    def from_species_name(cls, species_name: str) -> Self:
+        return cls(Tempedia.get_id_from_name(species_name))
+
+
+# TODO inject random
+@dataclass(frozen=True)
+class TemBattleConfig:
+    stat_cls: Type[Stats] = Stats
+    battle_technique_names: list[str] = field(default_factory=list)
+    tvs: Optional[TvsInitializer] = None
+    svs: Optional[SvsInitializer] = None
+    level: int | Callable[[int, int], int] = random.randint
+
+    @classmethod
+    def from_data(
+        cls,
+        battle_techniques: list[str],
+        tvs: Optional[list[int]] = None,
+        svs: Optional[list[int]] = None,
+        level: int = random.randint(
+            TemTemConstants.TEM_MIN_LEVEL, TemTemConstants.TEM_MAX_LEVEL
+        )
+    ) -> Self:
+        if svs is None:
+            svs = []
+
+        if tvs is None:
+            tvs = []
+
+        assert len(svs) in [
+            0,
+            len(Stat),
+        ], f"SVs list does not have acceptable size: {len(svs)=} {len(Stat)=}"
+        svs_init = SvsInitializer(
+            {} if len(svs) == 0 else Stat.initializer_dict_from_list(svs)
+        )
+        assert len(tvs) in [
+            0,
+            len(Stat),
+        ], f"TVs list does not have acceptable size: {len(svs)=} {len(Stat)=}"
+        tvs_init = TvsInitializer(
+            {} if len(tvs) == 0 else Stat.initializer_dict_from_list(tvs)
+        )
+
+        return cls(
+            battle_technique_names=battle_techniques,
+            level=level,
+            tvs=tvs_init,
+            svs=svs_init
+        )
+
+
+@dataclass(frozen=True)
+class TemSpeciesConfig:
+    # name and id will be muttually exclusiva. will populate id on passing the name
+    species_identifier: SpeciesIdentifier
+    secondary_type: TemTemType = TemTemType.NO_TYPE
+
+
+    @classmethod
+    def from_data(cls, species_name: str, secondary_type: Optional[TemTemType] = None) -> Self:
+
+        species_identifier = SpeciesIdentifier.from_species_name(species_name)
+
+        return cls(
+                species_identifier=species_identifier
+            ) if secondary_type is None \
+              else cls(
+                species_identifier=species_identifier,
+                secondary_type=secondary_type
+            )
+
 
 class Tem(TemSpecies):
     def __init__(
-        self,
-        species_id: int,
-        stat_cls: Type[Stats],
-        battle_technique_names: Optional[list[str]] = None,
-        tvs: Optional[TvsInitializer] = None,
-        svs: Optional[SvsInitializer] = None,
-        level: int | Callable[[int, int], int] = random.randint,
-        secondary_type: TemTemType = TemTemType.NO_TYPE,
-        nickname: str = "",
+            self,
+            species_config: TemSpeciesConfig,
+            battle_config: TemBattleConfig,
+            nickname: str = ""
     ) -> None:
         """
         Initializes a new Tem.
-
-        Args:
-        - id (int): The ID of the Tem species.
-        - stat_cls (Type[Stats]): The class used to calculate the Tem's stats.
-        - battle_technique_names (list[str], optional): The technique names to consider as
-            battle ready. If none is passed we'll give the last 4 moves it can learn.
-        - tvs (TvsInitializer | None, optional): The Tem's TV stats. Defaults to None.
-        - svs (SvsInitializer | None, optional): The Tem's SV stats. Defaults to None.
-        - level (int | Callable[[int, int], int], optional): The Tem's level or a callable
-            function to generate it. Defaults to random.randint.
-        - secondary_type (TemTemType, optional): The Tem's secondary type.
-            Defaults to TemTemType.NO_TYPE.
-        - nickname (str, optional): The Tem's nickname. Defaults to "".
-
-        Returns:
-        - None
         """
-        if battle_technique_names is None:
-            battle_technique_names = []
 
-        kwargs: TemSpeciesArg = {"species_id": species_id}
+        kwargs: TemSpeciesArg = {"species_id":
+                                 species_config.species_identifier.species_id}
 
-        if Tempedia.get_name(species_id).lower() in TemTemConstants.MULTIPLE_SECONDARY_TYPE:
-            if secondary_type == TemTemType.NO_TYPE:
-                secondary_type = TemTemType.get_random_type(secondary_type)
-            kwargs["secondary_type"] = secondary_type
+        if Tempedia.get_name(
+            species_config.species_identifier.species_id
+        ).lower() in TemTemConstants.MULTIPLE_SECONDARY_TYPE:
+            #if secondary_type == TemTemType.NO_TYPE:
+            #    secondary_type = TemTemType.get_random_type(secondary_type)
+            kwargs["secondary_type"] = TemTemType.get_random_type(species_config.secondary_type) \
+                if species_config.secondary_type == TemTemType.NO_TYPE \
+                    else species_config.secondary_type
 
         super().__init__(**kwargs)
         kargs: StatsArguments = {"base": self._base}
-        if tvs is not None:
-            kargs["tvs"] = tvs
-        if svs is not None:
-            kargs["svs"] = svs
-        self.__stats = stat_cls(**kargs)
+        if battle_config.tvs is not None:
+            kargs["tvs"] = battle_config.tvs
+        if battle_config.svs is not None:
+            kargs["svs"] = battle_config.svs
+        self.__stats = battle_config.stat_cls(**kargs)
         self.__level = (
-            level(TemTemConstants.TEM_MIN_LEVEL, TemTemConstants.TEM_MAX_LEVEL)
-            if callable(level)
-            else level
+            battle_config.level(
+                TemTemConstants.TEM_MIN_LEVEL, TemTemConstants.TEM_MAX_LEVEL
+            ) if callable(battle_config.level)
+                else battle_config.level
         )
         self.__nickname = nickname
 
-        if len(battle_technique_names) == 0:
-            battle_technique_names = super()._get_latest_learnable_techniques(
-                self.__level
-            ).names
+        battle_technique_names = battle_config.battle_technique_names \
+            if any(battle_config.battle_technique_names) \
+                else super()._get_latest_learnable_techniques(
+                    self.__level
+                ).names
+
         self.__battle_techniques = BattleTechniques(battle_technique_names)
 
         assert (
             TemTemConstants.TEM_MIN_LEVEL <= self.__level <= TemTemConstants.TEM_MAX_LEVEL
-        ), f"Level {level} is not allowed."
+        ), f"Level {battle_config.level} is not allowed."
 
     @classmethod
     def from_random_encounter(
@@ -198,7 +261,15 @@ class Tem(TemSpecies):
         Returns:
         - Tem: The newly created Tem.
         """
-        return cls(species_id, RandomEncounterStats, secondary_type=secondary_type)
+        return cls(
+            TemSpeciesConfig(
+                SpeciesIdentifier(species_id),
+                secondary_type=secondary_type
+            ),
+            TemBattleConfig(
+                RandomEncounterStats
+            )
+        )
 
     @classmethod
     def from_random_stats(
@@ -215,7 +286,15 @@ class Tem(TemSpecies):
         Returns:
         - Tem: The newly created Tem.
         """
-        return cls(species_id, RandomStats, secondary_type=secondary_type)
+        return cls(
+            TemSpeciesConfig(
+                SpeciesIdentifier(species_id),
+                secondary_type=secondary_type
+            ),
+            TemBattleConfig(
+                RandomStats
+            )
+        )
 
     @classmethod
     def from_competitive(
@@ -239,96 +318,15 @@ class Tem(TemSpecies):
         - Tem: The newly created Tem.
         """
         return cls(
-            species_id, CompetitiveStats, tvs=tvs, level=level, secondary_type=secondary_type
-        )
-
-    @classmethod
-    def from_custom(
-        cls,
-        species_id: int,
-        tvs: TvsInitializer,
-        svs: SvsInitializer,
-        level: int,
-        battle_techniques: list[str],
-        secondary_type: TemTemType = TemTemType.NO_TYPE,
-        nickname: str = "",
-    ) -> Self:
-        """
-        Create a custom TemTem instance with specific TV, SV, and level.
-
-        Args:
-        - id (int): The ID of the TemTem species.
-        - tvs (TvsInitializer): The TV values for the TemTem.
-        - svs (SvsInitializer): The SV values for the TemTem.
-        - level (int): The level of the TemTem.
-        - secondary_type (TemTemType, optional): The secondary type of the TemTem.
-            Defaults to TemTemType.NO_TYPE.
-
-        Returns:
-        - Tem: The custom TemTem instance.
-        """
-        return cls(
-            species_id,
-            Stats,
-            tvs=tvs,
-            svs=svs,
-            level=level,
-            secondary_type=secondary_type,
-            battle_technique_names=battle_techniques,
-            nickname=nickname,
-        )
-
-    @classmethod
-    def from_data(
-        cls,
-        name: str,
-        battle_techniques: list[str],
-        svs: Optional[list[int]] = None,
-        tvs: Optional[list[int]] = None,
-        level: int = random.randint(
-            TemTemConstants.TEM_MIN_LEVEL, TemTemConstants.TEM_MAX_LEVEL
-        ),
-        secondary_type: TemTemType = TemTemType.NO_TYPE,
-        nickname: str = "",
-    ) -> Self:
-        """
-        Create a custom TemTem instance from raw data.
-
-        Args:
-        - name (str): Species name.
-        - svs (list[int], optional): The SV values for the TemTem. Defaults to [].
-        - tvs (list[int], optional): The TV values for the TemTem. Defaults to [].
-        - level (int, optional): The level of the TemTem. Defaults to random.
-        - secondary_type (TemTemType, optional): The secondary type of the TemTem.
-            Defaults to TemTemType.NO_TYPE.
-
-        Returns:
-        - Tem: The custom TemTem instance.
-        """
-        if svs is None:
-            svs = []
-
-        if tvs is None:
-            tvs = []
-
-        species_id = Tempedia.get_id_from_name(name)
-        assert len(svs) in [
-            0,
-            len(Stat),
-        ], f"SVs list does not have acceptable size: {len(svs)=} {len(Stat)=}"
-        svs_init = SvsInitializer(
-            {} if len(svs) == 0 else Stat.initializer_dict_from_list(svs)
-        )
-        assert len(tvs) in [
-            0,
-            len(Stat),
-        ], f"TVs list does not have acceptable size: {len(svs)=} {len(Stat)=}"
-        tvs_init = TvsInitializer(
-            {} if len(tvs) == 0 else Stat.initializer_dict_from_list(tvs)
-        )
-
-        return cls.from_custom(
-            species_id, tvs_init, svs_init, level, battle_techniques, secondary_type, nickname
+            TemSpeciesConfig(
+                SpeciesIdentifier(species_id),
+                secondary_type=secondary_type
+            ),
+            TemBattleConfig(
+                CompetitiveStats,
+                tvs=tvs,
+                level=level
+            )
         )
 
     @property
@@ -532,7 +530,8 @@ if __name__ == "__main__":
     ic(t_rand.species_name, t_rand.types, effectiveness)
 
     tech = Technique.get_random_technique(
-        [c for c in TechniqueClass if c != TechniqueClass.STATUS], *t_rand.types
+        *t_rand.types,
+        classes=[c for c in TechniqueClass if c != TechniqueClass.STATUS]
     )
     damage = t_rand.calculate_atacking_damage(tech, t_enc)
 

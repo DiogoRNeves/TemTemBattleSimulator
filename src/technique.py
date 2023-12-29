@@ -195,18 +195,35 @@ class Technique:
         """
         lookup_name: str = name.lower()
         assert lookup_name in _techniques, f"Technique not found: {name}"
-        technique_data = _techniques[lookup_name]
-        self.__name: str = technique_data["name"]
-        self.__damage: int = technique_data["damage"]
-        self.__type: TemTemType = TemTemType.from_string(technique_data["type"])
-        self.__stamina_cost: int = technique_data["staminaCost"]
-        self.__hold: int = technique_data["hold"]
+
+        self.__technique_data = _techniques[lookup_name]
+        self.__type: TemTemType = TemTemType.from_string(self.__technique_data["type"])
         self.__held: int = 0
         self.__priority: TechniquePriority = TechniquePriority.from_string(
-            technique_data["priority"]
+            self.__technique_data["priority"]
         )
-        self.__targets: TechniqueTargets = TechniqueTargets.from_string(technique_data["targets"])
-        self.__class = TechniqueClass.from_string(technique_data["class"])
+        self.__targets: TechniqueTargets = TechniqueTargets.from_string(
+            self.__technique_data["targets"]
+        )
+        self.__class = TechniqueClass.from_string(
+            self.__technique_data["class"]
+        )
+
+    @property
+    def __name(self) -> str:
+        return self.__technique_data["name"]
+
+    @property
+    def __hold(self) -> str:
+        return self.__technique_data["hold"]
+
+    @property
+    def __stamina_cost(self) -> str:
+        return self.__technique_data["staminaCost"]
+
+    @property
+    def __damage(self) -> str:
+        return self.__technique_data["damage"]
 
     @staticmethod
     def get_random_technique(

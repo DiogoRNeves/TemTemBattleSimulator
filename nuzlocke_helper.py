@@ -7,7 +7,7 @@ from typing_extensions import TypedDict, NotRequired
 
 from src.tem_stat import Stat
 from src.team import PlaythroughTeam
-from src.tem import Tem
+from src.tem import SpeciesIdentifier, Tem, TemBattleConfig, TemSpeciesConfig
 from src.tempedia import Tempedia
 import src.tem_tem_constants as TemTemConstants
 
@@ -42,17 +42,21 @@ assert isinstance(
 
 my_team = PlaythroughTeam(
     [
-        Tem.from_data(
-            name=d["name"],
-            svs=d.get("svs", [
-                random.randint(TemTemConstants.MIN_SV,TemTemConstants.MAX_SV)
-                    for _ in range(len(Stat))
-                ]
+        Tem(
+            species_config=TemSpeciesConfig(
+                species_identifier=SpeciesIdentifier.from_species_name(d["name"])
             ),
-            tvs=d.get("tvs", [0] * len(Stat)),
-            level=d["level"],
-            battle_techniques=d["techniques"],
-            nickname=d.get("nickname", ""),
+            battle_config=TemBattleConfig(
+                battle_technique_names=d["techniques"],
+                level=d["level"],
+                svs=d.get("svs", [
+                    random.randint(TemTemConstants.MIN_SV,TemTemConstants.MAX_SV)
+                        for _ in range(len(Stat))
+                    ]
+                ),
+                tvs=d.get("tvs", [0] * len(Stat))
+            ),
+            nickname=d.get("nickname", "")
         )
         for d in my_team_config
     ]
