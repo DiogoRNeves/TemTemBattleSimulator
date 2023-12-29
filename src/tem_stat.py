@@ -49,7 +49,7 @@ class Stat(Enum):
         """
         Returns a list of all the Stat values.
         """
-        return [i for i in cls]
+        return list(cls)
 
     @classmethod
     def initializer_dict(cls, temtem: TemTemStatsJson) -> dict[Stat, int]:

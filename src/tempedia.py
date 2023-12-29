@@ -142,12 +142,16 @@ class Tempedia():
         ]
 
     @staticmethod
-    def get_latest_learnable_technique_names(tem_id: int, level: int, max_number_of_techniques: int) -> list[str]:
-        assert level >= TemTemConstants.TEM_MIN_LEVEL and level <= TemTemConstants.TEM_MAX_LEVEL, f"Level not allowed: {level=}"
+    def get_latest_learnable_technique_names(
+        tem_id: int,
+        level: int,
+        max_number_of_techniques: int
+    ) -> list[str]:
+        assert TemTemConstants.TEM_MIN_LEVEL <= level \
+            <= TemTemConstants.TEM_MAX_LEVEL, f"Level not allowed: {level=}"
 
         # always return at least one technique name
-        if max_number_of_techniques < 1:
-            max_number_of_techniques = 1
+        max_number_of_techniques = max(1, max_number_of_techniques)
 
         techs = list(filter(lambda t: t.get("levels", level + 1) <= level, _tems[tem_id]["techniques"] ))
         techs.sort(key=lambda t: t.get("levels", 0), reverse=True)

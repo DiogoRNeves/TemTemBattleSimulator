@@ -45,7 +45,7 @@ class StatsInitializer(ABC, Mapping):
         }
         for val in t.values():
             assert (
-                val >= min_stat and val <= max_stat
+               min_stat <= val <= max_stat
             ), f"Stat of {val} not allowed. Must be between {min_stat} and {max_stat}."
 
         self._values = t

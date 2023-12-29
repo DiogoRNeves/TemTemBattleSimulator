@@ -31,14 +31,15 @@ def array_sum(n: int, s: int, m: int) -> list[int]:
     """
 
     assert (
-        n > 0 and s > 0 and m > 0 and m * n >= s
+        # min(n, s, m) > 0 is equivalent to n > 0 and s > 0 and m > 0
+        min(n, s, m) > 0 and m * n >= s
     ), f"Cant provide an array with length {n} and sum {s} having max element  {m}."
 
     # Initialize a list of n elements with 0s
     result = [0] * n
 
     # Keep track of indices that have not reached the maximum value of m
-    not_maxed = [i for i in range(n)]
+    not_maxed = list(range(n))
 
     # Loop until the desired sum is reached
     while sum(result) < s:
@@ -216,7 +217,7 @@ class Stats:
         """
         Returns the total number of TV points invested across all Stats.
         """
-        return sum([self.get_stat(stat, StatValueType.TV) for stat in Stat])
+        return sum(self.get_stat(stat, StatValueType.TV) for stat in Stat)
 
     def __call__(self, level) -> dict[Stat, int]:
         """

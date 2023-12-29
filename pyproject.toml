@@ -3,4 +3,5 @@ disable = [
     "C0111", "C0116", "C0115", "C0114" # ignoring docstrings for now
     , "W0511" # ignoring TODO/fixme for now, because we're developing
     , "W0238" # ignoring unused-private-member for now, because we're developing
+    , "R0903" # ignoring too-few-public-methods for now, because we're developing
 ]

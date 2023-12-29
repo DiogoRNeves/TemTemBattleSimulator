@@ -17,7 +17,7 @@ class Team(ABC):
         tem_list = list(set(tems))  # no dupes.
         list_size = len(tem_list)
         assert (
-            list_size > 0 and list_size <= max_team_size
+            0 <list_size <= max_team_size
         ), f"Invalid team size: {list_size}"
 
         self.__MAX_TEAM_SIZE: Final[int] = max_team_size
