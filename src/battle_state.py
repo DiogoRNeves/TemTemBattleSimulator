@@ -4,7 +4,7 @@ from typing import Self
 from src.battle_action import TeamAction, TurnAction
 from src.battle_team import TeamBattlePosition, Teams
 from src.team import Team
-from patterns.sequential_enum import SequentialEnum
+from src.patterns.sequential_enum import SequentialEnum
 
 
 class BattlePhase(SequentialEnum):
