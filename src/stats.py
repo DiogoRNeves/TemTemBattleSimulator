@@ -89,22 +89,24 @@ def rand_values_dict_max_sum(keys: list[U], intendd_sum: int, max_element: int) 
     return {keys[i]: vals[i] for i in range(len(keys))}
 
 
-class StatsArguments(TypedDict):
-    """
-    Typed dictionary containing the arguments for initializing a `Stats` object.
+StatsArguments = TypedDict(
+    "StatsArguments",
+    {
+        "base": BaseValueInitializer,
+        "svs": NotRequired[SvsInitializer],
+        "tvs": NotRequired[TvsInitializer],
+    }
+)
+"""
+Typed dictionary containing the arguments for initializing a `Stats` object.
 
-    Attributes:
-        base (BaseValueInitializer): The initial values for the Temtem's base stats.
-        svs (Optional[SvsInitializer]): The initial values for the Temtem's SVs (single values).
-            Defaults to None.
-        tvs (Optional[TvsInitializer]): The initial values for the Temtem's TVs (training values).
-            Defaults to None.
-    """
-
-    base: BaseValueInitializer
-    svs: NotRequired[SvsInitializer]
-    tvs: NotRequired[TvsInitializer]
-
+Attributes:
+    base (BaseValueInitializer): The initial values for the Temtem's base stats.
+    svs (Optional[SvsInitializer]): The initial values for the Temtem's SVs (single values).
+        Defaults to None.
+    tvs (Optional[TvsInitializer]): The initial values for the Temtem's TVs (training values).
+        Defaults to None.
+"""
 
 class Stats:
     """

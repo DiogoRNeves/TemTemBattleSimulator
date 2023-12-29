@@ -31,15 +31,23 @@ TemTemStatsJson = TypedDict(
     }
 )
 
-class SimplifiedTechnique(TypedDict):
-    name: str
-    source: str
-    levels: NotRequired[int]
+SimplifiedTechnique = TypedDict(
+    "SimplifiedTechnique",
+    {
+        "name": str,
+        "source": str,
+        "levels": NotRequired[int],
+    }
+)
 
-class TemTemJson(TypedDict):
-    number: int
-    name: str
-    types: list[str]
-    stats: TemTemStatsJson
-    traits: list[str]
-    techniques: list[SimplifiedTechnique]
+TemTemJson = TypedDict(
+    "TemTemJson",
+    {
+        "number": int,
+        "name": str,
+        "types": list[str],
+        "stats": TemTemStatsJson,
+        "traits": list[str],
+        "techniques": list[SimplifiedTechnique],
+    }
+)
