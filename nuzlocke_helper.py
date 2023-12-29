@@ -7,7 +7,7 @@ from typing_extensions import TypedDict, NotRequired
 
 from src.tem_stat import Stat
 from src.team import PlaythroughTeam
-from src.tem import SpeciesIdentifier, Tem, TemBattleConfig, TemSpeciesConfig
+from src.tem import Tem, TemBattleConfig, TemSpeciesConfig
 from src.tempedia import Tempedia
 import src.tem_tem_constants as TemTemConstants
 
@@ -43,11 +43,11 @@ assert isinstance(
 my_team = PlaythroughTeam(
     [
         Tem(
-            species_config=TemSpeciesConfig(
-                species_identifier=SpeciesIdentifier.from_species_name(d["name"])
+            species_config=TemSpeciesConfig.from_data(
+                d["name"]
             ),
-            battle_config=TemBattleConfig(
-                battle_technique_names=d["techniques"],
+            battle_config=TemBattleConfig.from_data(
+                battle_techniques=d["techniques"],
                 level=d["level"],
                 svs=d.get("svs", [
                     random.randint(TemTemConstants.MIN_SV,TemTemConstants.MAX_SV)
@@ -141,20 +141,24 @@ if __name__ == "__main__":
 
     for d in opponent_tems:
         max_sv_tems.append(
-            Tem.from_data(
-                name=d["name"],
-                level=d["level"],
-                svs=[TemTemConstants.MAX_SV] * len(Stat),
-                battle_techniques=d["techniques"],
+            Tem(
+                species_config=TemSpeciesConfig.from_data(species_name=d["name"]),
+                battle_config=TemBattleConfig.from_data(
+                    level=d["level"],
+                    svs=[TemTemConstants.MAX_SV] * len(Stat),
+                    battle_techniques=d["techniques"]
+                )
             )
         )
 
         min_sv_tems.append(
-            Tem.from_data(
-                name=d["name"],
-                level=d["level"],
-                svs=[MIN_AI_SVS] * len(Stat),
-                battle_techniques=d["techniques"],
+            Tem(
+                species_config=TemSpeciesConfig.from_data(species_name=d["name"]),
+                battle_config=TemBattleConfig.from_data(
+                    level=d["level"],
+                    svs=[MIN_AI_SVS] * len(Stat),
+                    battle_techniques=d["techniques"]
+                )
             )
         )
 

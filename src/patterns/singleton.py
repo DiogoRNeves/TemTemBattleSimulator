@@ -1,27 +1,22 @@
 import threading
-from typing import Type
+from typing import Type, TypeVar
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+T = TypeVar('T')
 
 # https://old.reddit.com/r/Python/comments/2qkwgh/class_to_enforce_singleton_pattern_on_subclasses/
-def singleton(theclass: Type[object]) -> Type[object]:
+def singleton(theclass: Type[T]) -> Type[T]:
     # Assumes that theclass doesn't define a __new__ method.
     # Defining __init__ is okay though.
-    theclass.instance = None
+    object.__setattr__(theclass, 'singleton_instance', None)
     lock = threading.Lock()
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls: Type[T], *args, **kwargs) -> T:
         with lock:
-            if cls.instance is None:
+            if cls.singleton_instance is None:
                 if theclass.__base__ is object:
                     obj = super(theclass, cls).__new__(cls, None)
                 else:
                     obj = super(theclass, cls).__new__(cls, *args, **kwargs)
-                cls.instance = obj
-            return cls.instance
+                cls.singleton_instance = obj
+            return cls.singleton_instance
     theclass.__new__ = __new__
     return theclass

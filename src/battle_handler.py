@@ -220,6 +220,7 @@ class CompetitiveBattleHandler(BattleHandler):
     def _end_turn(self, state: BattleState):
         raise NotImplementedError
 
+@singleton
 class EnvironmentBattleHandler(BattleHandler, ABC):
     def __init__(self, disallowed_actions: Optional[Iterable[ActionType]] = None):
         super().__init__(PlaythroughTeam, disallowed_actions)

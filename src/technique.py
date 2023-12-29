@@ -214,15 +214,15 @@ class Technique:
         return self.__technique_data["name"]
 
     @property
-    def __hold(self) -> str:
+    def __hold(self) -> int:
         return self.__technique_data["hold"]
 
     @property
-    def __stamina_cost(self) -> str:
+    def __stamina_cost(self) -> int:
         return self.__technique_data["staminaCost"]
 
     @property
-    def __damage(self) -> str:
+    def __damage(self) -> int:
         return self.__technique_data["damage"]
 
     @staticmethod
@@ -359,5 +359,5 @@ if __name__ == "__main__":
     ic(len(_techniques))
     for i in range(10):
         tp = TemTemType.get_random_type(TemTemType.NO_TYPE)
-        t = Technique.get_random_technique(TechniqueClass, tp)
+        t = Technique.get_random_technique(tp)
         ic(tp, t)
