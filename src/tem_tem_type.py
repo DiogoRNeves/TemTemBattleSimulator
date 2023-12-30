@@ -4,6 +4,7 @@ import json
 import math
 import random
 from enum import Enum, auto
+from typing import Iterable, Iterator
 
 
 
@@ -95,7 +96,7 @@ for atk_str, data in d.items():
         _multipliers[attacker][defender] = multiplier
 
 
-class TemType:
+class TemType(Iterable):
     """Class representing the type of a TemTem monster."""
     def __init__(
         self, primary_type: TemTemType, secondary_type: TemTemType = TemTemType.NO_TYPE
@@ -142,7 +143,7 @@ class TemType:
         """
         return self.__current_types[1]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[TemTemType]:
         """
         Returns an iterator over the current types of the TemType.
 

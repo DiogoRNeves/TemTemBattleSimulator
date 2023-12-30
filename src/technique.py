@@ -300,7 +300,7 @@ class Technique:
         return self.__type
 
     def calculate_damage(
-        self, atkr_lvl: int, atk: int, df: int, types: TemType, *extra_modifiers
+        self, atkr_lvl: int, atk: int, df: int, types: TemType, *extra_modifiers: int | float
     ) -> int:
         """
         Calculates the damage that the technique will inflict.
