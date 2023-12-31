@@ -248,8 +248,14 @@ class Technique:
             )
             and TechniqueClass.from_string(tech["class"]) in classes
         ]
-        rand_name = random.choice(names)
-        return Technique(rand_name)
+
+        if any(names):
+            rand_name = random.choice(names)
+            return Technique(rand_name)
+
+        raise ValueError(
+            f"There should be at least one technique of the give types: {temtem_type}"
+        )
 
     @property
     def name(self) -> str:
@@ -300,7 +306,12 @@ class Technique:
         return self.__type
 
     def calculate_damage(
-        self, atkr_lvl: int, atk: int, df: int, types: TemType, *extra_modifiers: int | float
+        self,
+        atkr_lvl: int,
+        atk: int,
+        df: int,
+        types: TemType,
+        *extra_modifiers: int | float
     ) -> int:
         """
         Calculates the damage that the technique will inflict.
@@ -351,13 +362,3 @@ class Technique:
 
     def __eq__(self, __o: Technique) -> bool:
         return self.name == __o.name
-
-
-if __name__ == "__main__":
-    from icecream import ic
-
-    ic(len(_techniques))
-    for i in range(10):
-        tp = TemTemType.get_random_type(TemTemType.NO_TYPE)
-        t = Technique.get_random_technique(tp)
-        ic(tp, t)
