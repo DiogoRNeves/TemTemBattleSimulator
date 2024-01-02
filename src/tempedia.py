@@ -1,8 +1,8 @@
 
 import json
+import random
 import re
 from typing import Callable, Tuple
-from random import Random
 
 from src.json_typed_dict import TemTemJson
 from src.tem_stat import Stat
@@ -44,8 +44,7 @@ class Tempedia():
 
     @staticmethod
     def _get_random_id_from_filter(
-        fltr: Callable[[Tuple[int, TemTemJson]], bool],
-        rndm: Random
+        fltr: Callable[[Tuple[int, TemTemJson]], bool]
     ) -> int:
         """
         Returns a random id of a temtem that satisfies the given filter.
@@ -62,10 +61,10 @@ class Tempedia():
         """
         l = dict(filter(fltr, _tems.items()))
         assert len(l) > 0, "No results for given filter."
-        return rndm.choice(list(l.keys()))
+        return random.choice(list(l.keys()))
 
     @staticmethod
-    def get_random_atk_id(rndm: Random = Random()) -> int:
+    def get_random_atk_id() -> int:
         """
         Returns the id of a temtem that has a higher atk stat than spatk stat.
 
@@ -75,10 +74,10 @@ class Tempedia():
         fltr: Callable[[Tuple[int, TemTemJson]], bool] = (
             lambda a: a[1]["stats"]["atk"] > a[1]["stats"]["spatk"]
         )
-        return Tempedia._get_random_id_from_filter(fltr, rndm)
+        return Tempedia._get_random_id_from_filter(fltr)
 
     @staticmethod
-    def get_random_spatk_id(rndm: Random = Random()) -> int:
+    def get_random_spatk_id() -> int:
         """
         Returns the id of a temtem that has a higher spatk stat than atk stat.
 
@@ -88,10 +87,10 @@ class Tempedia():
         fltr: Callable[[Tuple[int, TemTemJson]], bool] = (
             lambda a: a[1]["stats"]["spatk"] > a[1]["stats"]["atk"]
         )
-        return Tempedia._get_random_id_from_filter(fltr, rndm)
+        return Tempedia._get_random_id_from_filter(fltr)
 
     @staticmethod
-    def get_id_from_name(name: str, rndm: Random = Random()) -> int:
+    def get_id_from_name(name: str) -> int:
         """
         Returns the id of a temtem with the given name.
 
@@ -108,7 +107,7 @@ class Tempedia():
             lambda a: a[1]["name"].lower() == name.lower()
         )
         try:
-            species_id = Tempedia._get_random_id_from_filter(fltr, rndm)
+            species_id = Tempedia._get_random_id_from_filter(fltr)
         except AssertionError as e:
             raise AssertionError(f"No temtems named {name}.") from e
         return species_id

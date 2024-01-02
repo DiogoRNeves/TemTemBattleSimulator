@@ -1,5 +1,4 @@
 
-from random import Random
 from typing import Callable
 from copy import deepcopy
 
@@ -34,16 +33,14 @@ if __name__ == '__main__':
     from src.battle_agent import FirstActionAvailableBattleAgent, RandomBattleAgent
     from icecream import ic
 
-    r: Random = Random(2)
-
     def generate_team(
-            id_generator: Callable[[Random],int],
+            id_generator: Callable[[],int],
             tvs: TvsInitializer,
             team_size: int = PLAYTHROUGH_TEAM_SIZE
     ) -> list[Tem]:
         t: list[Tem] = []
         for _ in range(team_size):
-            _id: int = id_generator(r)
+            _id: int = id_generator()
             name: str = Tempedia.get_name(_id)
 
             ic(name)
