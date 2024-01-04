@@ -1,8 +1,7 @@
 from contextlib import AbstractContextManager, nullcontext as does_not_raise
 import pytest
 
-from hypothesis import given
-from hypothesis.strategies import lists, sampled_from
+from hypothesis import event, given, strategies as st
 
 from src.technique import Technique
 from src.tem_tem_type import TemTemType
@@ -19,22 +18,32 @@ from src.tem_tem_type import TemTemType
         ) for t in TemTemType
     ]
 )
+@given(
+    seed=st.random_module()
+)
 def test_random_tech_from_single_type(
     type_to_choose: TemTemType,
-    expectation: AbstractContextManager[BaseException]
+    expectation: AbstractContextManager[BaseException],
+    seed
 ) -> None:
+    event(seed)
     with expectation:
         t = Technique.get_random_technique(type_to_choose)
         assert t.type == type_to_choose
 
 @given(
-    types_to_choose=lists(
-        elements=sampled_from(TemTemType),
+    types_to_choose=st.lists(
+        elements=st.sampled_from(TemTemType),
         min_size=2,
         max_size=len(TemTemType),
         unique=True
-    )
+    ),
+    seed=st.random_module()
 )
-def test_random_tech_from_list(types_to_choose: list[TemTemType]) -> None:
+def test_random_tech_from_list(
+    types_to_choose: list[TemTemType],
+    seed
+) -> None:
+    event(seed)
     t = Technique.get_random_technique(*types_to_choose)
     assert t.type in types_to_choose
