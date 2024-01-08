@@ -89,6 +89,20 @@ class Tempedia():
         )
         return Tempedia._get_random_id_from_filter(fltr)
 
+
+    @staticmethod
+    def get_random_id() -> int:
+        """
+        Returns the id of a random temtem.
+
+        Returns:
+        - int: The id of a random temtem.
+        """
+        fltr: Callable[[Tuple[int, TemTemJson]], bool] = (
+            lambda a: True
+        )
+        return Tempedia._get_random_id_from_filter(fltr)
+
     @staticmethod
     def get_id_from_name(name: str) -> int:
         """

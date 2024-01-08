@@ -1,12 +1,15 @@
 from abc import ABC
-from typing import Final, Iterable, TypeVar
+from typing import Iterable, Self, Type
 
 from src.tem import Tem
 import src.tem_tem_constants as TemTemConstants
+from src.tempedia import Tempedia
 
 
 class Team(ABC):
-    def __init__(self, max_team_size: int, tems: Iterable[Tem]):
+    _max_team_size: int = -1
+
+    def __init__(self, tems: Iterable[Tem]):
         """
         Initializes a new instance of the Team class.
 
@@ -14,13 +17,14 @@ class Team(ABC):
         - max_team_size (int): The maximum size of the team.
         - tems (Iterable[Tem]): An iterable of Tem objects to be included in the team.
         """
+        assert type(self)._max_team_size > 0, \
+            f"Team subclass must define a max team size > 0 {type(self)._max_team_size=}"
         tem_list = list(set(tems))  # no dupes.
         list_size = len(tem_list)
         assert (
-            0 <list_size <= max_team_size
+            0 < list_size <= type(self)._max_team_size
         ), f"Invalid team size: {list_size}"
 
-        self.__max_team_size: Final[int] = max_team_size
         self.__tems = tem_list
 
     def add(self, tem: Tem):
@@ -34,9 +38,10 @@ class Team(ABC):
         - ValueError: If the team is already at its maximum size or if the Tem object
             is already in the team.
         """
-        if len(self.__tems) == self.__max_team_size:
+        if len(self.__tems) == type(self)._max_team_size:
             raise ValueError(
-                f"Cannot add Tem to team - team already has maximum size of {self.__max_team_size}."
+                "Cannot add Tem to team - team already has maximum size of " \
+                    + f"{type(self)._max_team_size}."
             )
 
         if tem in self.__tems:
@@ -49,6 +54,15 @@ class Team(ABC):
             raise ValueError(f"Cannot remove Tem from team - Tem not in team: {tem.display_name=}")
 
         self.__tems.remove(tem)
+
+    @classmethod
+    def get_random(cls: Type[Self]) -> Self:
+        tems: list[Tem] = [
+            Tem.from_random_stats(
+                Tempedia.get_random_id()
+            ) for _ in range(cls._max_team_size)
+        ]
+        return cls(tems)
 
     def __call__(self, species_name_or_nickname: str) -> Tem:
         """
@@ -101,31 +115,10 @@ class Team(ABC):
                 f"{t.battle_techniques.names}" for t in self
         ].__repr__()
 
-
-TeamT = TypeVar('TeamT', bound=Team)
-
 class CompetitiveTeam(Team):
     """A class representing a team used in a competitive battle"""
-
-    def __init__(self, tems: Iterable[Tem]):
-        """
-        Initializes a new instance of the CompetitiveTeam class.
-
-        Args:
-        - tems (Iterable[Tem]): An iterable of Tem objects to be included in the team.
-        """
-        # TODO validate all species are different
-        super().__init__(TemTemConstants.COMPETITIVE_TEAM_SIZE, tems)
-
+    _max_team_size = TemTemConstants.COMPETITIVE_TEAM_SIZE # type: ignore
 
 class PlaythroughTeam(Team):
     """A class representing a team used in a playthrough"""
-
-    def __init__(self, tems: Iterable[Tem]):
-        """
-        Initializes a new instance of the PlaythroughTeam class.
-
-        Args:
-        - tems (Iterable[Tem]): An iterable of Tem objects to be included in the team.
-        """
-        super().__init__(TemTemConstants.PLAYTHROUGH_TEAM_SIZE, tems)
+    _max_team_size = TemTemConstants.PLAYTHROUGH_TEAM_SIZE # type: ignore

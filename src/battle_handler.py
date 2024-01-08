@@ -9,7 +9,7 @@ from src.battle_action import (Action, ActionCollection, ActionType,
     TeamAction, TurnActionCollection, ActionTarget)
 from src.battle_state import BattleState
 from src.battle_team import TeamBattlePosition, Teams
-from src.team import CompetitiveTeam, PlaythroughTeam, TeamT, Team
+from src.team import CompetitiveTeam, PlaythroughTeam, Team
 from src.patterns.singleton import singleton
 
 class BattleActionQueue(PriorityQueue[Action]):
@@ -57,7 +57,7 @@ class BattleActionQueue(PriorityQueue[Action]):
 class BattleHandler(ABC):
     def __init__(
             self,
-            team_class: Type[TeamT],
+            team_class: Type[Team],
             disallowed_actions: Optional[Iterable[ActionType]] = None
     ):
         if disallowed_actions is None:

@@ -9,7 +9,7 @@ Requires python >= 3.11, developed on 3.11.3
 To run a file in the src folder (say battle.py) use
 
 ```bash
-$ py src.battle
+$ py -m src.battle
 ```
 
 You should run pytest via python, so that it will add the current directory to sys.path:

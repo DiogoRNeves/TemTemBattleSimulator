@@ -7,7 +7,7 @@ T = TypeVar('T')
 def singleton(theclass: Type[T]) -> Type[T]:
     # Assumes that theclass doesn't define a __new__ method.
     # Defining __init__ is okay though.
-    object.__setattr__(theclass, 'singleton_instance', None)
+    theclass.singleton_instance = None
     lock = threading.Lock()
     def __new__(cls: Type[T], *args, **kwargs) -> T:
         with lock:
