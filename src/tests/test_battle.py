@@ -77,8 +77,8 @@ from src.team import PlaythroughTeam
 def test_random_action_battle_ends(seed):
     event(seed)
     s = BattleState(
-        team_orange=PlaythroughTeam(PlaythroughTeam.get_random()),
-        team_blue=PlaythroughTeam(PlaythroughTeam.get_random())
+        team_orange=PlaythroughTeam.get_random(),
+        team_blue=PlaythroughTeam.get_random()
     )
 
     b = Battle(
