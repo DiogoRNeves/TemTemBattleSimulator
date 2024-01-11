@@ -17,5 +17,4 @@ class FirstActionAvailableBattleAgent(BattleAgent):
 
 class RandomBattleAgent(BattleAgent):
     def choose_action(self, state: SidedBattleState) -> TeamAction:
-        i: int = random.randint(0, len(state.possible_actions) - 1)
-        return state.possible_actions[i]
+        return random.choice(state.possible_actions)
