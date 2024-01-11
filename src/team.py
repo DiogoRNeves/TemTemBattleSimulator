@@ -14,7 +14,6 @@ class Team(ABC):
         Initializes a new instance of the Team class.
 
         Args:
-        - max_team_size (int): The maximum size of the team.
         - tems (Iterable[Tem]): An iterable of Tem objects to be included in the team.
         """
         assert type(self)._max_team_size > 0, \
@@ -117,8 +116,8 @@ class Team(ABC):
 
 class CompetitiveTeam(Team):
     """A class representing a team used in a competitive battle"""
-    _max_team_size = TemTemConstants.COMPETITIVE_TEAM_SIZE # type: ignore
+    _max_team_size = TemTemConstants.COMPETITIVE_TEAM_SIZE
 
 class PlaythroughTeam(Team):
     """A class representing a team used in a playthrough"""
-    _max_team_size = TemTemConstants.PLAYTHROUGH_TEAM_SIZE # type: ignore
+    _max_team_size = TemTemConstants.PLAYTHROUGH_TEAM_SIZE
