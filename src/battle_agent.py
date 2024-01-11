@@ -1,6 +1,6 @@
 
 from abc import ABC, abstractmethod
-from random import Random
+import random
 
 from src.battle_action import TeamAction
 from src.battle_state import SidedBattleState
@@ -16,10 +16,6 @@ class FirstActionAvailableBattleAgent(BattleAgent):
         return state.possible_actions[0]
 
 class RandomBattleAgent(BattleAgent):
-    def __init__(self, r: Random = Random()) -> None:
-        super().__init__()
-        self.__random = r
-
     def choose_action(self, state: SidedBattleState) -> TeamAction:
-        i: int = self.__random.randint(0, len(state.possible_actions) - 1)
+        i: int = random.randint(0, len(state.possible_actions) - 1)
         return state.possible_actions[i]
