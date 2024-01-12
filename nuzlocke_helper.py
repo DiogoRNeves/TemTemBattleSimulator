@@ -132,9 +132,9 @@ if __name__ == "__main__":
     min_sv_tems = []
 
     opponent_tems = (
-        [t for t in opponent_tems_config if t["name"].lower() in args.opponent_tems]
+        opponent_tems_config
         if args.custom_opponent_tems is None
-        else args.custom_opponent_tems
+        else [t for t in opponent_tems_config if t["name"].lower() in args.opponent_tems]
     )
 
     ic(opponent_tems)
