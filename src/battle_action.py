@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import ABC, abstractmethod
 from enum import Enum, auto
 from typing import Iterable, Iterator, Optional, Self, Tuple
 from itertools import product
@@ -9,6 +10,16 @@ from src.technique import Technique
 class Item:
     def __init__(self) -> None:
         raise NotImplementedError
+
+    @property
+    def possible_targets(self) -> Iterable[ActionTarget]:
+        # TODO make it depend on the item ?
+        return [
+            ActionTarget.SELF,
+            ActionTarget.TEAM_MATE,
+            ActionTarget.OPPONENT_LEFT,
+            ActionTarget.OPPONENT_RIGHT,
+        ]
 
 TechOrItem = Technique | Item
 
@@ -24,25 +35,117 @@ class ActionTarget(Enum):
     OTHERS = auto()
 
 
-class ActionType(Enum):
-    USE_TECHNIQUE = auto()
-    SWITCH = auto()
-    REST = auto()
-    USE_ITEM = auto()
-    RUN = auto()
+# class ActionType(Enum):
+#     USE_TECHNIQUE = auto()
+#     SWITCH = auto()
+#     REST = auto()
+#     USE_ITEM = auto()
+#     RUN = auto()
 
-class Action:
+
+
+class Action(ABC):
     def __init__(
             self,
-            action_type: ActionType,
-            selected_target: ActionTarget,
+            selected_target: Optional[ActionTarget] = None,
             detail: Optional[TechOrItem] = None
     ):
         raise NotImplementedError
 
+    @classmethod
+    @abstractmethod
+    def get_possible_actions(cls,
+        team: Teams,
+        position: TeamBattlePosition,
+        items: Iterable[Item],
+        techniques: Iterable[Technique]
+    ) -> ActionCollection:
+        pass
+
+    @abstractmethod
+    def is_compatible(self,
+        self_position,
+        other: Action,
+        other_position: TeamBattlePosition
+    ) -> bool:
+        """
+        Checks if two actions are compatible for use in the same team.
+        """
+
+class UseTechniqueAction(Action):
+    pass
+
+class SwitchTemAction(Action):
+    pass
+
+class RestAction(Action):
+    @classmethod
+    def get_possible_actions(cls,
+        team: Teams,
+        position: TeamBattlePosition,
+        items: Iterable[Item],
+        techniques: Iterable[Technique]
+    ) -> ActionCollection:
+        actions = ActionCollection()
+
+        # TODO: check if there are any situations where a temtem can't rest
+        # we are assuming they can always rest, if they are on the battlefield
+        actions.add(
+            cls(ActionTarget.SELF),
+            team,
+            position
+        )
+
+        return actions
+
+class UseItemAction(Action):
+    @classmethod
+    def get_possible_actions(cls,
+        team: Teams,
+        position: TeamBattlePosition,
+        items: Iterable[Item],
+        techniques: Iterable[Technique]
+    ) -> ActionCollection:
+        actions = ActionCollection()
+
+        for item in items:
+            for target in item.possible_targets:
+                actions.add(
+                    cls(target, item),
+                    team,
+                    position
+                )
+
+        return actions
+
+class RunAction(Action):
+    @classmethod
+    def get_possible_actions(cls,
+        team: Teams,
+        position: TeamBattlePosition,
+        items: Iterable[Item],
+        techniques: Iterable[Technique]
+    ) -> ActionCollection:
+
+        actions: ActionCollection = ActionCollection()
+        actions.add(cls(), team, position)
+
+        return actions
+
 class TeamAction:
     def __init__(self, position_action: dict[TeamBattlePosition, Action]):
-        raise NotImplementedError
+        self.__position_action = position_action
+
+    @property
+    def are_actions_compatible(self) -> bool:
+        if len(self.__position_action) <= 1:
+            return True
+
+        return self.__position_action[TeamBattlePosition.LEFT].is_compatible(
+            TeamBattlePosition.LEFT,
+            self.__position_action[TeamBattlePosition.RIGHT],
+            TeamBattlePosition.RIGHT
+        )
 
 class TurnAction:
     def __init__(self, team_actions: Optional[dict[Teams, TeamAction]] = None):
@@ -144,6 +247,7 @@ class TurnActionCollection():
         for possibility in possibilities:
             turn_action: dict[Teams, TeamAction] = {}
             i: int = 0
+            are_actions_compatible: bool = True
             for team in Teams:
                 team_action: dict[TeamBattlePosition,Action] = {}
                 for position in TeamBattlePosition:
@@ -151,8 +255,15 @@ class TurnActionCollection():
                         team_action[position] = possibility[i]
                         i += 1
                 turn_action[team] = TeamAction(team_action)
+                are_actions_compatible = turn_action[team].are_actions_compatible
+
+                if not are_actions_compatible:
+                    break
+
                 i += 1
-            yield TurnAction(turn_action)
+
+            if are_actions_compatible:
+                yield TurnAction(turn_action)
 
 class RunnableAction():
     def __init__(self, action: Action, team: Teams, position: TeamBattlePosition) -> None:

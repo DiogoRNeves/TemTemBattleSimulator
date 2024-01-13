@@ -1,10 +1,11 @@
 from __future__ import annotations
 from enum import auto
-from typing import Iterator, Self, Tuple
-from src.battle_action import TeamAction, TurnAction
+from typing import Iterable, Iterator, Self, Tuple
+from src.battle_action import Item, TeamAction, TurnAction
 from src.battle_team import TeamBattlePosition, Teams
 from src.team import Team
 from src.patterns.sequential_enum import SequentialEnum
+from src.technique import Technique
 
 
 class BattlePhase(SequentialEnum):
@@ -90,6 +91,13 @@ class BattleState():
         self.__phase_turn: int = 0
 
     def team_has_actions(self, team: Teams) -> bool:
+        raise NotImplementedError
+
+    def get_items(self, team: Teams) -> Iterable[Item]: #pylint: disable=unused-argument
+        # TODO: implement it, one day
+        return []
+
+    def get_techniques(self, team: Teams, position: TeamBattlePosition) -> Iterable[Technique]:
         raise NotImplementedError
 
     def clear_action_selection(self):

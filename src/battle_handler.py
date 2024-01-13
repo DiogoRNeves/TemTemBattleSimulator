@@ -5,10 +5,10 @@ from typing import Iterable, Optional, Type
 from asyncio import Task, TaskGroup, run
 
 from src.battle_agent import BattleAgent
-from src.battle_action import (Action, ActionCollection, ActionType,
-    TeamAction, TurnActionCollection, ActionTarget, RunnableAction)
+from src.battle_action import (Action, ActionCollection, RunAction,
+    TeamAction, TurnActionCollection, RunnableAction, UseItemAction)
 from src.battle_state import BattleState
-from src.battle_team import TeamBattlePosition, Teams
+from src.battle_team import Teams
 from src.team import CompetitiveTeam, PlaythroughTeam, Team
 from src.patterns.singleton import singleton
 
@@ -58,20 +58,20 @@ class BattleHandler(ABC):
     def __init__(
             self,
             team_class: Type[Team],
-            disallowed_actions: Optional[Iterable[ActionType]] = None
+            disallowed_actions: Optional[Iterable[type[Action]]] = None
     ):
         if disallowed_actions is None:
             disallowed_actions = []
         self.__team_class = team_class
-        self.__allowed_actions: list[ActionType] = [
-            action_type for action_type in ActionType
+        self.__allowed_actions: list[type[Action]] = [
+            action_type for action_type in Action.__subclasses__()
                 if action_type not in disallowed_actions
         ]
         self.__clear_action_queue()
         self._possible_actions: Optional[TurnActionCollection] = None
 
     @property
-    def _allowed_actions(self) -> list[ActionType]:
+    def _allowed_actions(self) -> list[type[Action]]:
         return self.__allowed_actions
 
     async def __ask_player_for_action(
@@ -149,62 +149,21 @@ class BattleHandler(ABC):
 
         self._generate_possible_actions(state)
 
-    def __possible_actions(self, state: BattleState, action_type: ActionType) -> ActionCollection:
-        # i know i can use reflection, but this makes it easier to read
-        # and the linter doesn't complain about private methods not being used
-        match (action_type):
-            case ActionType.USE_TECHNIQUE:
-                return self.__possible_actions_use_technique(state)
-            case ActionType.SWITCH:
-                return self.__possible_turn_action_switch(state)
-            case ActionType.REST:
-                return self.__possible_actions_rest(state)
-            case ActionType.USE_ITEM:
-                return self.__possible_actions_use_item(state)
-            case ActionType.RUN:
-                return self.__possible_actions_run(state)
-            case unsupported_action_type:
-                raise ValueError(f"Unsupported action type: {unsupported_action_type.name}")
-
-    def __possible_actions_use_technique(self, state: BattleState) -> ActionCollection:
-        raise NotImplementedError
-
-    def __possible_turn_action_switch(self, state: BattleState) -> ActionCollection:
-        raise NotImplementedError
-
-    def __possible_actions_rest(self, state: BattleState) -> ActionCollection:
-        actions = ActionCollection()
-        for team, position in state.positions:
-            # TODO: check if there are any situations where a temtem can't rest
-            # we are assuming they can always rest, if they are out
-            if state.team_has_temtem_in_position(team, position):
-                actions.add(
-                    Action(ActionType.REST, ActionTarget.SELF),
-                    team,
-                    position
-                )
-        return actions
-
-    def __possible_actions_use_item(self, state: BattleState) -> ActionCollection: #pylint: disable=unused-argument
-        # raise NotImplementedError
-        # TODO: use an item someday
-        return ActionCollection()
-
-    def __possible_actions_run(self, state: BattleState) -> ActionCollection: #pylint: disable=unused-argument
-
-        actions: ActionCollection = ActionCollection()
-        for team, position in state.positions:
-            actions.add(Action(ActionType.RUN, ActionTarget.ALL), team, position)
-
-        return actions
-
     def _generate_possible_actions(self, state: BattleState):
         actions: ActionCollection = ActionCollection()
         for action_type in self.__allowed_actions:
-            actions_for_type = self.__possible_actions(state, action_type)
+            for team, position in state.positions:
+                actions_for_type: ActionCollection = \
+                    action_type.get_possible_actions(
+                        team,
+                        position,
+                        state.get_items(team),
+                        state.get_techniques(team, position)
+                    )
 
-            if actions_for_type.has_actions():
-                actions.union(actions_for_type)
+                if actions_for_type.has_actions():
+                    actions.union(actions_for_type)
+
 
         self._possible_actions = TurnActionCollection(actions)
 
@@ -217,7 +176,7 @@ class BattleHandler(ABC):
 @singleton
 class CompetitiveBattleHandler(BattleHandler):
     def __init__(self):
-        super().__init__(CompetitiveTeam, [ActionType.USE_ITEM, ActionType.RUN])
+        super().__init__(CompetitiveTeam, [UseItemAction, RunAction])
 
 
     def _end_turn(self, state: BattleState):
@@ -225,13 +184,13 @@ class CompetitiveBattleHandler(BattleHandler):
 
 @singleton
 class EnvironmentBattleHandler(BattleHandler, ABC):
-    def __init__(self, disallowed_actions: Optional[Iterable[ActionType]] = None):
+    def __init__(self, disallowed_actions: Optional[Iterable[type[Action]]] = None):
         super().__init__(PlaythroughTeam, disallowed_actions)
 
 @singleton
 class TamerBattleHandler(EnvironmentBattleHandler):
     def __init__(self):
-        super().__init__([ActionType.RUN])
+        super().__init__([RunAction])
 
     def _end_turn(self, state: BattleState):
         raise NotImplementedError
