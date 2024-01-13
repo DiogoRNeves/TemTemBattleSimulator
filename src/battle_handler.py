@@ -6,20 +6,20 @@ from asyncio import Task, TaskGroup, run
 
 from src.battle_agent import BattleAgent
 from src.battle_action import (Action, ActionCollection, ActionType,
-    TeamAction, TurnActionCollection, ActionTarget)
+    TeamAction, TurnActionCollection, ActionTarget, RunnableAction)
 from src.battle_state import BattleState
 from src.battle_team import TeamBattlePosition, Teams
 from src.team import CompetitiveTeam, PlaythroughTeam, Team
 from src.patterns.singleton import singleton
 
-class BattleActionQueue(PriorityQueue[Action]):
+class BattleActionQueue(PriorityQueue[RunnableAction]):
 
-    def get(self, state: BattleState) -> Action:
+    def get(self, state: BattleState) -> RunnableAction:
         """
         Returns the next action, using the current state's speed arrow to resolve ties
         """
         candidate_action = super().get()
-        result: Action = candidate_action
+        result: RunnableAction = candidate_action
 
         if self.queue[0].priority == candidate_action.priority:
             # grab them all
@@ -116,7 +116,7 @@ class BattleHandler(ABC):
 
         self.__end_turn(state)
 
-    def __execute_action(self, action: Action):
+    def __execute_action(self, action: RunnableAction):
         raise NotImplementedError
 
     def is_valid_starting_team(self, team: Team) -> bool:
