@@ -174,16 +174,15 @@ class BattleHandler(ABC):
 
     def __possible_actions_rest(self, state: BattleState) -> ActionCollection:
         actions = ActionCollection()
-        for team in Teams:
-            for position in TeamBattlePosition:
-                # TODO: check if there are any situations where a temtem can't rest
-                # we are assuming they can always rest, if they are out
-                if state.team_has_temtem_in_position(team, position):
-                    actions.add(
-                        Action(ActionType.REST, ActionTarget.SELF),
-                        team,
-                        position
-                    )
+        for team, position in state.positions:
+            # TODO: check if there are any situations where a temtem can't rest
+            # we are assuming they can always rest, if they are out
+            if state.team_has_temtem_in_position(team, position):
+                actions.add(
+                    Action(ActionType.REST, ActionTarget.SELF),
+                    team,
+                    position
+                )
         return actions
 
     def __possible_actions_use_item(self, state: BattleState) -> ActionCollection: #pylint: disable=unused-argument
@@ -193,11 +192,11 @@ class BattleHandler(ABC):
 
     def __possible_actions_run(self, state: BattleState) -> ActionCollection: #pylint: disable=unused-argument
 
-        ac: ActionCollection = ActionCollection()
+        actions: ActionCollection = ActionCollection()
         for team, position in state.positions:
-            ac.add(Action(ActionType.RUN, ActionTarget.ALL), team, position)
+            actions.add(Action(ActionType.RUN, ActionTarget.ALL), team, position)
 
-        return ac
+        return actions
 
     def _generate_possible_actions(self, state: BattleState):
         actions: ActionCollection = ActionCollection()
