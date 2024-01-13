@@ -253,10 +253,6 @@ class SwitchTemAction(Action):
     def in_tem(self) -> Tem:
         raise NotImplementedError
 
-    @property
-    def out_tem(self) -> Tem:
-        raise NotImplementedError
-
     def is_compatible(self,
         self_position: TeamBattlePosition,
         other: Action,
@@ -269,10 +265,7 @@ class SwitchTemAction(Action):
         if not isinstance(other, type(self)):
             return True
 
-        if self_position == other_position:
-            return False
-
-        return other.out_tem != self.out_tem and other.in_tem != self.in_tem
+        return self_position != other_position and other.in_tem != self.in_tem
 
 class RestAction(Action):
     @classmethod
