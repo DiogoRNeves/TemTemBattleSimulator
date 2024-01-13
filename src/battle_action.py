@@ -127,12 +127,6 @@ class TurnActionCollection():
     def __init__(self, actions: ActionCollection) -> None:
         self.__actions: ActionCollection = actions
 
-        # TODO make all combinations of actions. may take a while. for competitive:
-        # (4 moves + rest + 5 switches) ^ 2 *- (4 moves + rest + 4 switches) ^ 2
-        # 100 * 81 = 8100 turn actions PER TURN. this will be fun.
-
-
-
     def __iter__(self) -> Iterator[TurnAction]:
         action_lists: list[Iterable[Action]] = [
             self.__actions.get_actions(team, position)
