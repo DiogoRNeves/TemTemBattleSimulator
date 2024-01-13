@@ -43,12 +43,43 @@ class SidedBattleState():
     def possible_actions(self) -> list[TeamAction]:
         return self.__possible_actions
 
+class BattleField():
+    def __init__(self, teams: dict[Teams, Team]) -> None:
+        self.__teams = teams
+        self.__battle_field: dict[Teams, dict[TeamBattlePosition, Optional[Tem]]] = {}
+
+        # initialize battle field as empty
+        # battle_handler must set the tems into the battle field
+        for team_color in Teams:
+            self.__battle_field[team_color] = {}
+            for position in TeamBattlePosition:
+                self.__battle_field[team_color][position] = None
+
+    @property
+    def teams(self) -> dict[Teams, Team]:
+        return self.__teams
+
+    def get_tem(self, team: Teams, position: TeamBattlePosition) -> Optional[Tem]:
+        return self.__battle_field[team][position]
+
+    def get_bench(self, team: Teams) -> Iterable[Tem]:
+        active: list[Tem] = [tem for _, tem in self.get_active(team)]
+
+        for tem in self.__teams[team]:
+            if not tem in active:
+                yield tem
+
+    def get_active(self, team: Teams) -> Iterable[Tuple[TeamBattlePosition,Tem]]:
+        for position, tem in self.__battle_field[team].items():
+            if not tem is None:
+                yield (position, tem)
+
 class BattleState():
     def __init__(self, team_orange: Team, team_blue: Team):
-        self.__teams: dict[Teams, Team] = {
+        self.__battle_field: BattleField = BattleField({
             Teams.ORANGE: team_orange,
             Teams.BLUE: team_blue,
-        }
+        })
         self.__speed_arrow: Teams = Teams.BLUE
         self.__phase: BattlePhase = BattlePhase.NOT_STARTED
         self.__reset_phase_turn()
@@ -60,7 +91,7 @@ class BattleState():
         """
         Returns all the positions that can perform an action (#TODO)
         """
-        for team_color in self.__teams:
+        for team_color in self.__battle_field.teams:
             # TODO actually check the positions available before yielding
             for position in TeamBattlePosition:
                 yield (team_color, position)
@@ -101,10 +132,15 @@ class BattleState():
         return []
 
     def get_bench(self, team: Teams) -> Iterable[Tem]:
-        raise NotImplementedError
+        return self.__battle_field.get_bench(team)
 
     def get_techniques(self, team: Teams, position: TeamBattlePosition) -> Iterable[Technique]:
-        raise NotImplementedError
+        tem: Optional[Tem] = self.__battle_field.get_tem(team, position)
+
+        if tem is None:
+            return []
+
+        return tem.battle_techniques
 
     def clear_action_selection(self):
         self.__turn_action: TurnAction = TurnAction()
