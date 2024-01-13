@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum, auto
-from typing import Iterable, Iterator, Optional, Self
+from typing import Iterable, Iterator, Optional, Self, Tuple
 from itertools import product
 
 from src.battle_team import TeamBattlePosition, Teams
@@ -120,7 +120,7 @@ class ActionCollection():
                 if actions.has_actions(t, p):
                     self.__actions[t][p].union(actions.get_actions(t, p))
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[Tuple[Teams, TeamBattlePosition, Action]]:
         for team in Teams:
             for position in TeamBattlePosition:
                 if self.has_actions(team, position):

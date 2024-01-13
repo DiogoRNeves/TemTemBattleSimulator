@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import auto
-from typing import Self
+from typing import Iterator, Self, Tuple
 from src.battle_action import TeamAction, TurnAction
 from src.battle_team import TeamBattlePosition, Teams
 from src.team import Team
@@ -50,6 +50,16 @@ class BattleState():
         self.__reset_phase_turn()
         self.__history: dict[BattlePhase, list[TurnAction]] = {} # proper class ?
         self.clear_action_selection()
+
+    @property
+    def positions(self) -> Iterator[Tuple[Teams, TeamBattlePosition]]:
+        """
+        Returns all the positions that can perform an action (#TODO)
+        """
+        for team_color in self.__teams:
+            # TODO actually check the positions available before yielding
+            for position in TeamBattlePosition:
+                yield (team_color, position)
 
     @property
     def selected_actions(self) -> TurnAction:
