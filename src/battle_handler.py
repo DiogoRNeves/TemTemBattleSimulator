@@ -192,8 +192,12 @@ class BattleHandler(ABC):
         return ActionCollection()
 
     def __possible_actions_run(self, state: BattleState) -> ActionCollection: #pylint: disable=unused-argument
-        # we are strong. we never run.
-        return ActionCollection()
+
+        ac: ActionCollection = ActionCollection()
+        for team, position in state.positions:
+            ac.add(Action(ActionType.RUN, ActionTarget.ALL), team, position)
+
+        return ac
 
     def _generate_possible_actions(self, state: BattleState):
         actions: ActionCollection = ActionCollection()
