@@ -180,7 +180,7 @@ class BattleHandler(ABC):
                 # we are assuming they can always rest, if they are out
                 if state.team_has_temtem_in_position(team, position):
                     actions.add(
-                        Action(ActionType.RUN, ActionTarget.NO_SELECTION),
+                        Action(ActionType.REST, ActionTarget.SELF),
                         team,
                         position
                     )
