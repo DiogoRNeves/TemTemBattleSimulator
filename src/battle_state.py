@@ -249,6 +249,31 @@ class SwitchTemAction(Action):
 
         return actions
 
+    @property
+    def in_tem(self) -> Tem:
+        raise NotImplementedError
+
+    @property
+    def out_tem(self) -> Tem:
+        raise NotImplementedError
+
+    def is_compatible(self,
+        self_position: TeamBattlePosition,
+        other: Action,
+        other_position: TeamBattlePosition
+    ) -> bool:
+        """
+        A switch action is compatible with every other action type.
+        It is compatible with another switch action only if they don't switch in/out the same tem
+        """
+        if not isinstance(other, type(self)):
+            return True
+
+        if self_position == other_position:
+            return False
+
+        return other.out_tem != self.out_tem and other.in_tem != self.in_tem
+
 class RestAction(Action):
     @classmethod
     def get_possible_actions(cls,
