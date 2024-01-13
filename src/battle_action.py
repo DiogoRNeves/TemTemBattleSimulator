@@ -121,19 +121,23 @@ class ActionCollection():
                     self.__actions[t][p].union(actions.get_actions(t, p))
 
     def __iter__(self) -> Iterator:
-        return self.get_actions().__iter__()
+        for team in Teams:
+            for position in TeamBattlePosition:
+                if self.has_actions(team, position):
+                    for action in self.get_actions(team, position):
+                        yield (team, position, action)
 
 class TurnActionCollection():
     def __init__(self, actions: ActionCollection) -> None:
         self.__actions: ActionCollection = actions
 
     def __iter__(self) -> Iterator[TurnAction]:
-        action_lists: list[Iterable[Action]] = [
+        action_lists: Iterable[Iterable[Action]] = (
             self.__actions.get_actions(team, position)
                 for team in Teams
                     for position in TeamBattlePosition
                         if self.__actions.has_actions(team, position)
-        ]
+        )
 
         possibilities = product(*action_lists)
 
