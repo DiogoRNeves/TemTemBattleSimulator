@@ -2,8 +2,7 @@
 from abc import ABC, abstractmethod
 import random
 
-from src.battle_action import TeamAction
-from src.battle_state import SidedBattleState
+from src.battle_state import SidedBattleState, TeamAction
 
 class BattleAgent(ABC):
     @abstractmethod

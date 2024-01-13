@@ -5,9 +5,10 @@ from typing import Iterable, Optional, Type
 from asyncio import Task, TaskGroup, run
 
 from src.battle_agent import BattleAgent
-from src.battle_action import (Action, ActionCollection, RunAction,
-    TeamAction, TurnActionCollection, RunnableAction, UseItemAction)
-from src.battle_state import BattleState
+from src.battle_state import (
+    BattleState, Action, ActionCollection, RunAction, UseItemAction, TeamAction,
+    TurnActionCollection, RunnableAction
+)
 from src.battle_team import Teams
 from src.team import CompetitiveTeam, PlaythroughTeam, Team
 from src.patterns.singleton import singleton
@@ -157,8 +158,7 @@ class BattleHandler(ABC):
                     action_type.get_possible_actions(
                         team,
                         position,
-                        state.get_items(team),
-                        state.get_techniques(team, position)
+                        state
                     )
 
                 if actions_for_type.has_actions():

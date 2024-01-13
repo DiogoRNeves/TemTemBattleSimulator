@@ -9,6 +9,7 @@ from typing import Iterable
 from src.json_typed_dict import TechniqueJson
 from src.tem_stat import Stat
 from src.tem_tem_type import TemTemType, TemType
+from src.targets import TechniqueTargets
 
 with open("./temtem_api/techniques.json", encoding="utf8") as file:
     # Load its content and make a new dictionary
@@ -90,52 +91,6 @@ class TechniqueClass(Enum):
                 return Stat.SPDEF
             case TechniqueClass.PHYSICAL:
                 return Stat.DEF
-
-
-# ic| k: 'targets'
-#     set([t[k] for t in _techniques.values()]): {'All',
-#                                                 'All Other Temtem',
-#                                                 'Other Team or Ally',
-#                                                 'Self',
-#                                                 'Single Other Target',
-#                                                 'Single Target',
-#                                                 'Single Team'}
-
-
-class TechniqueTargets(Enum):
-    """
-    An enumeration representing the possible targets of a technique.
-
-    Attributes:
-        ALL (TechniqueTargets): All temtem, including allies and foes.
-        ALL_OTHER_TEMTEM (TechniqueTargets): All temtem other than the user.
-        OTHER_TEAM_OR_ALLY (TechniqueTargets): An ally or a foe.
-        SELF (TechniqueTargets): The user of the technique.
-        SINGLE_OTHER_TARGET (TechniqueTargets): A single temtem other than the user.
-        SINGLE_TARGET (TechniqueTargets): A single temtem, including allies and foes.
-        SINGLE_TEAM (TechniqueTargets): All temtem on the user's team.
-    """
-    ALL = auto()
-    ALL_OTHER_TEMTEM = auto()
-    OTHER_TEAM_OR_ALLY = auto()
-    SELF = auto()
-    SINGLE_OTHER_TARGET = auto()
-    SINGLE_TARGET = auto()
-    SINGLE_TEAM = auto()
-
-    @staticmethod
-    def from_string(targets: str) -> TechniqueTargets:
-        """Returns a TechniqueTargets instance based on the given string.
-
-        Args:
-        - targets (str): The string to match to a TechniqueTargets instance.
-
-        Returns:
-        - TechniqueTargets: The corresponding TechniqueTargets instance.
-
-        """
-        return TechniqueTargets[targets.replace(" ", "_").upper()]
-
 
 # ic| k: 'priority'
 # set([t[k] for t in _techniques.values()]):
@@ -264,6 +219,10 @@ class Technique:
     @property
     def inflicts_damage(self) -> bool:
         return self.__class != TechniqueClass.STATUS
+
+    @property
+    def targets(self) -> TechniqueTargets:
+        return self.__targets
 
     @property
     def is_ready(self) -> bool:
