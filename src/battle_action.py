@@ -1,6 +1,7 @@
 from __future__ import annotations
 from enum import Enum, auto
 from typing import Iterable, Iterator, Optional, Self
+from itertools import product
 
 from src.battle_team import TeamBattlePosition, Teams
 from src.technique import Technique
@@ -32,18 +33,11 @@ class ActionType(Enum):
 
 class Action:
     def __init__(
-            self, action_type: ActionType,
+            self,
+            action_type: ActionType,
             selected_target: ActionTarget,
             detail: Optional[TechOrItem] = None
     ):
-        raise NotImplementedError
-
-    @property
-    def team(self) -> Teams:
-        raise NotImplementedError
-
-    @property
-    def priority(self) -> int:
         raise NotImplementedError
 
 class TeamAction:
@@ -52,21 +46,24 @@ class TeamAction:
 
 class TurnAction:
     def __init__(self, team_actions: Optional[dict[Teams, TeamAction]] = None):
-        pass
+        self.__team_actions: dict[Teams, TeamAction] = {} if team_actions is None else team_actions
 
     @property
     def is_ready(self) -> bool:
-        raise NotImplementedError
+        for team in Teams:
+            if not self.has_team_action(team):
+                return False
+        return True
 
     @property
-    def actions(self) -> list[Action]:
+    def actions(self) -> list[RunnableAction]:
         raise NotImplementedError
 
     def has_team_action(self, team: Teams) -> bool:
-        raise NotImplementedError
+        return team in self.__team_actions
 
     def __str__(self) -> str:
-        raise NotImplementedError
+        return self.__team_actions.__str__()
 
 class ActionCollection():
     def __init__(self) -> None:
@@ -117,20 +114,56 @@ class ActionCollection():
     def add(self, action: Action, team: Teams, position: TeamBattlePosition):
         self.__actions[team][position].add(action)
 
-    @property
-    def possible_turn_actions(self) -> Iterable[TurnAction]:
-        # convert the individual actions into turn actions
-        raise NotImplementedError
-
     def union(self, actions: Self) -> None:
         for t in Teams:
             for p in TeamBattlePosition:
                 if actions.has_actions(t, p):
                     self.__actions[t][p].union(actions.get_actions(t, p))
 
+    def __iter__(self) -> Iterator:
+        return self.get_actions().__iter__()
+
 class TurnActionCollection():
     def __init__(self, actions: ActionCollection) -> None:
-        self.__turn_actions: Iterable[TurnAction] = actions.possible_turn_actions
+        self.__actions: ActionCollection = actions
+
+        # TODO make all combinations of actions. may take a while. for competitive:
+        # (4 moves + rest + 5 switches) ^ 2 *- (4 moves + rest + 4 switches) ^ 2
+        # 100 * 81 = 8100 turn actions PER TURN. this will be fun.
+
+
 
     def __iter__(self) -> Iterator[TurnAction]:
-        return self.__turn_actions.__iter__()
+        action_lists: list[Iterable[Action]] = [
+            self.__actions.get_actions(team, position)
+                for team in Teams
+                    for position in TeamBattlePosition
+                        if self.__actions.has_actions(team, position)
+        ]
+
+        possibilities = product(*action_lists)
+
+        for possibility in possibilities:
+            turn_action: dict[Teams, TeamAction] = {}
+            i: int = 0
+            for team in Teams:
+                team_action: dict[TeamBattlePosition,Action] = {}
+                for position in TeamBattlePosition:
+                    if self.__actions.has_actions(team, position):
+                        team_action[position] = possibility[i]
+                        i += 1
+                turn_action[team] = TeamAction(team_action)
+                i += 1
+            yield TurnAction(turn_action)
+
+class RunnableAction():
+    def __init__(self, action: Action, team: Teams, position: TeamBattlePosition) -> None:
+        raise NotImplementedError
+
+    @property
+    def team(self) -> Teams:
+        raise NotImplementedError
+
+    @property
+    def priority(self) -> int:
+        raise NotImplementedError
