@@ -115,9 +115,19 @@ class BattleHandler(ABC):
             action = self.__action_queue.get(state)
             self.__execute_action(action)
 
-            # TODO check if we nees to end the battle / transition to the next phase
+            # TODO check if we need to end the battle / transition to the next phase
+            if self._should_end_battle(state):
+                while state.phase[0].value < BattlePhase.FINISHED.value:
+                    state.next_phase()
 
         self.__end_turn(state)
+
+    def _should_end_battle(self, state: BattleState) -> bool:
+        for team in Teams:
+            if not any(state.get_alive_temtems(team)):
+                return True
+
+        return False
 
     def __execute_action(self, action: RunnableAction):
         raise NotImplementedError
@@ -209,4 +219,4 @@ class TamerBattleHandler(EnvironmentBattleHandler):
         super().__init__([RunAction])
 
     def _end_turn(self, state: BattleState):
-        raise NotImplementedError
+        pass

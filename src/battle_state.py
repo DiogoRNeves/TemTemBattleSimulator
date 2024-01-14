@@ -104,7 +104,7 @@ class BattleState():
 
     @property
     def selected_actions(self) -> TurnAction:
-        raise NotImplementedError
+        return self.__turn_action
 
     @property
     def phase(self) -> tuple[BattlePhase, int]:
@@ -132,6 +132,11 @@ class BattleState():
 
     def __reset_phase_turn(self):
         self.__phase_turn: int = 0
+
+    def get_alive_temtems(self, team: Teams) -> Iterator[Tem]:
+        for tem in self.__battle_field.teams[team]:
+            if tem.is_alive:
+                yield tem
 
     def select_action(self, action: TeamAction, team: Teams):
         raise NotImplementedError
@@ -386,6 +391,10 @@ class TeamAction:
             TeamBattlePosition.RIGHT
         )
 
+    def __iter__(self) -> Iterator[tuple[TeamBattlePosition, Action]]:
+        for position, action in self.__position_action.items():
+            yield (position, action)
+
 class TurnAction:
     def __init__(self, team_actions: Optional[dict[Teams, TeamAction]] = None):
         self.__team_actions: dict[Teams, TeamAction] = {} if team_actions is None else team_actions
@@ -398,11 +407,17 @@ class TurnAction:
         return True
 
     @property
-    def actions(self) -> list[RunnableAction]:
-        raise NotImplementedError
+    def actions(self) -> Iterator[RunnableAction]:
+        for team_color, position, action in self:
+            yield RunnableAction(action=action, team=team_color, position=position)
 
     def has_team_action(self, team: Teams) -> bool:
         return team in self.__team_actions
+
+    def __iter__(self) -> Iterator[tuple[Teams, TeamBattlePosition, Action]]:
+        for team_color, team_action in self.__team_actions.items():
+            for position, action in team_action:
+                yield (team_color, position, action)
 
     def __str__(self) -> str:
         return self.__team_actions.__str__()

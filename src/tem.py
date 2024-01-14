@@ -241,6 +241,7 @@ class Tem(TemSpecies):
                 ).names
 
         self.__battle_techniques = BattleTechniques(battle_technique_names)
+        self.__hp = self.stats[Stat.HP]
 
         assert (
             TemTemConstants.TEM_MIN_LEVEL <= self.__level <= TemTemConstants.TEM_MAX_LEVEL
@@ -419,6 +420,14 @@ class Tem(TemSpecies):
         - dict[Stat, int]: A dictionary containing the TV values for the TemTem.
         """
         return self.__stats.tvs
+
+    @property
+    def current_hp(self) -> int:
+        return self.__hp
+
+    @property
+    def is_alive(self) -> bool:
+        return self.current_hp > 0
 
     def _get_type_multiplier(self, attacking_type: TemTemType) -> float:
         """
