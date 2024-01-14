@@ -93,7 +93,7 @@ class BattleHandler(ABC):
 
         async with TaskGroup() as tg:
             for team in Teams:
-                if state.team_has_actions(team) and (not state.is_team_action_selected(team)):
+                if self.team_has_actions(team) and (not state.is_team_action_selected(team)):
                     tasks.append(
                         tg.create_task(
                             self.__ask_player_for_action(players[team], state, team)
@@ -124,6 +124,9 @@ class BattleHandler(ABC):
 
     def is_valid_starting_team(self, team: Team) -> bool:
         return isinstance(team, self.__team_class)
+
+    def team_has_actions(self, team: Teams) -> bool:
+        return not self._possible_actions is None and self._possible_actions.team_has_actions(team)
 
     def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
         assert len(players) == len(Teams), \

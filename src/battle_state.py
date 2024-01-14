@@ -90,6 +90,7 @@ class BattleState():
         self.__reset_phase_turn()
         self.__history: dict[BattlePhase, list[TurnAction]] = {} # proper class ?
         self.clear_action_selection()
+        self.__turn_action: TurnAction = TurnAction()
 
     @property
     def positions(self) -> Iterator[Tuple[Teams, TeamBattlePosition]]:
@@ -132,8 +133,11 @@ class BattleState():
     def __reset_phase_turn(self):
         self.__phase_turn: int = 0
 
-    def team_has_actions(self, team: Teams) -> bool:
+    def select_action(self, action: TeamAction, team: Teams):
         raise NotImplementedError
+
+    def is_team_action_selected(self, team: Teams) -> bool:
+        return self.__turn_action.has_team_action(team)
 
     def get_items(self, team: Teams) -> Iterable[Item]: #pylint: disable=unused-argument
         # TODO: implement it, one day
@@ -162,9 +166,6 @@ class BattleState():
         self.__reset_phase_turn()
         return self.phase[0]
 
-    def is_team_action_selected(self, team: Teams) -> bool:
-        return self.__turn_action.has_team_action(team)
-
     def set_battlefield_position(self, team: Teams, position: TeamBattlePosition, index: int):
         self.__battle_field.set_position(team, position, index)
 
@@ -175,8 +176,6 @@ class BattleState():
     def for_side(self, side: Teams) -> SidedBattleState:
         raise NotImplementedError
 
-    def select_action(self, action: TeamAction, team: Teams):
-        raise NotImplementedError
 
 
 class Item:
@@ -473,6 +472,9 @@ class ActionCollection():
 class TurnActionCollection():
     def __init__(self, actions: ActionCollection) -> None:
         self.__actions: ActionCollection = actions
+
+    def team_has_actions(self, team: Teams) -> bool:
+        return self.__actions.has_actions(team=team)
 
     def __iter__(self) -> Iterator[TurnAction]:
         action_lists: Iterable[Iterable[Action]] = (
