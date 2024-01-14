@@ -131,7 +131,11 @@ class BattleState():
         raise NotImplementedError
 
     def __reset_phase_turn(self):
-        self.__phase_turn: int = 0
+        self.__phase_turn: int = 1
+
+    def next_turn(self) -> Tuple[BattlePhase,int]:
+        self.__phase_turn += 1
+        return self.phase
 
     def get_alive_temtems(self, team: Teams) -> Iterator[Tem]:
         for tem in self.__battle_field.teams[team]:

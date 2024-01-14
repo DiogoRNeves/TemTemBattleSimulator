@@ -12,6 +12,7 @@ from src.battle_state import (
 from src.battle_team import TeamBattlePosition, Teams
 from src.team import CompetitiveTeam, PlaythroughTeam, Team
 from src.patterns.singleton import singleton
+from src.tem_tem_constants import BATTLE_MAX_TURNS
 
 class BattleActionQueue(PriorityQueue[RunnableAction]):
 
@@ -115,7 +116,6 @@ class BattleHandler(ABC):
             action = self.__action_queue.get(state)
             self.__execute_action(action)
 
-            # TODO check if we need to end the battle / transition to the next phase
             if self._should_end_battle(state):
                 while state.phase[0].value < BattlePhase.FINISHED.value:
                     state.next_phase()
@@ -123,10 +123,15 @@ class BattleHandler(ABC):
         self.__end_turn(state)
 
     def _should_end_battle(self, state: BattleState) -> bool:
+        if state.phase[1] > BATTLE_MAX_TURNS:
+            return True
+
         for team in Teams:
             if not any(state.get_alive_temtems(team)):
                 return True
 
+
+        # TODO check max turns a battle can have. end it if we have more than that
         return False
 
     def __execute_action(self, action: RunnableAction):
@@ -138,12 +143,12 @@ class BattleHandler(ABC):
     def team_has_actions(self, team: Teams) -> bool:
         return not self._possible_actions is None and self._possible_actions.team_has_actions(team)
 
-    def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
+    async def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
         assert len(players) == len(Teams), \
             f"teams and players must be the same size: {len(players)} players, {len(Teams)} teams"
 
         if not state.is_actions_selected:
-            actions = run(self.__ask_for_actions(state, players)) # asyncio.run
+            actions = await self.__ask_for_actions(state, players)
             for team_action, team in actions:
                 state.select_action(team_action, team)
         self.__process_actions(state)
@@ -155,6 +160,8 @@ class BattleHandler(ABC):
 
         # call end turn on child class for specific stuff
         self._end_turn(state)
+
+        state.next_turn()
 
     def _clear_generated_actions(self):
         self._possible_actions = None
@@ -216,7 +223,7 @@ class EnvironmentBattleHandler(BattleHandler, ABC):
 @singleton
 class TamerBattleHandler(EnvironmentBattleHandler):
     def __init__(self):
-        super().__init__([RunAction])
+        super().__init__(disallowed_actions=[RunAction])
 
     def _end_turn(self, state: BattleState):
         pass
