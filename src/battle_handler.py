@@ -6,10 +6,10 @@ from asyncio import Task, TaskGroup, run
 
 from src.battle_agent import BattleAgent
 from src.battle_state import (
-    BattleState, Action, ActionCollection, RunAction, UseItemAction, TeamAction,
+    BattlePhase, BattleState, Action, ActionCollection, RunAction, UseItemAction, TeamAction,
     TurnActionCollection, RunnableAction
 )
-from src.battle_team import Teams
+from src.battle_team import TeamBattlePosition, Teams
 from src.team import CompetitiveTeam, PlaythroughTeam, Team
 from src.patterns.singleton import singleton
 
@@ -111,9 +111,11 @@ class BattleHandler(ABC):
             self.__action_queue.put(action)
 
         # process the actions
-        while self.__action_queue.qsize() > 0:
+        while self.__action_queue.qsize() > 0 and state.phase[0].value < BattlePhase.FINISHED.value:
             action = self.__action_queue.get(state)
             self.__execute_action(action)
+
+            # TODO check if we nees to end the battle / transition to the next phase
 
         self.__end_turn(state)
 
@@ -167,7 +169,6 @@ class BattleHandler(ABC):
 
         self._possible_actions = TurnActionCollection(actions)
 
-
     @abstractmethod
     def _end_turn(self, state: BattleState):
         pass
@@ -178,7 +179,6 @@ class CompetitiveBattleHandler(BattleHandler):
     def __init__(self):
         super().__init__(CompetitiveTeam, [UseItemAction, RunAction])
 
-
     def _end_turn(self, state: BattleState):
         raise NotImplementedError
 
@@ -186,6 +186,19 @@ class CompetitiveBattleHandler(BattleHandler):
 class EnvironmentBattleHandler(BattleHandler, ABC):
     def __init__(self, disallowed_actions: Optional[Iterable[type[Action]]] = None):
         super().__init__(PlaythroughTeam, disallowed_actions)
+
+    def _generate_possible_actions(self, state: BattleState):
+        if state.phase[0] == BattlePhase.BEFORE_COMBAT:
+            # setup the battlefield with the first 2 tems of each team
+            for team_color in Teams:
+                for position in TeamBattlePosition:
+                    if any(state.get_bench(team_color)):
+                        state.set_battlefield_position(team_color, position, position.value)
+
+            # and advance the phase (to battle)
+            state.next_phase()
+
+        super()._generate_possible_actions(state)
 
 @singleton
 class TamerBattleHandler(EnvironmentBattleHandler):

@@ -74,6 +74,11 @@ class BattleField():
             if not tem is None:
                 yield (position, tem)
 
+    def set_position(self, team: Teams, position: TeamBattlePosition, index: int):
+        assert 0 < index < len(self.__teams[team])
+        self.__battle_field[team][position] = self.__teams[team][index]
+
+
 class BattleState():
     def __init__(self, team_orange: Team, team_blue: Team):
         self.__battle_field: BattleField = BattleField({
@@ -102,6 +107,9 @@ class BattleState():
 
     @property
     def phase(self) -> tuple[BattlePhase, int]:
+        """
+        Gets the phase and the turn on that phase we're on
+        """
         return (self.__phase, self.__phase_turn)
 
     @property
@@ -157,6 +165,9 @@ class BattleState():
     def is_team_action_selected(self, team: Teams) -> bool:
         return self.__turn_action.has_team_action(team)
 
+    def set_battlefield_position(self, team: Teams, position: TeamBattlePosition, index: int):
+        self.__battle_field.set_position(team, position, index)
+
     def team_has_temtem_in_position(self, team: Teams, position: TeamBattlePosition):
         # TODO implement a battlefield that takes care of the positions
         raise NotImplementedError
@@ -187,10 +198,9 @@ ActionDetail = Technique | Item | Tem
 class Action(ABC):
     def __init__(
             self,
-            selected_target: Optional[ActionTarget] = None,
-            detail: Optional[ActionDetail] = None
+            selected_target: ActionTarget
     ):
-        raise NotImplementedError
+        self._target = selected_target
 
     @classmethod
     @abstractmethod
@@ -212,6 +222,9 @@ class Action(ABC):
         """
 
 class UseTechniqueAction(Action):
+    def __init__(self, selected_target: ActionTarget, technique: Technique):
+        super().__init__(selected_target)
+        self._technique = technique
 
     @classmethod
     def get_possible_actions(cls,
@@ -224,7 +237,7 @@ class UseTechniqueAction(Action):
         for tech in state.get_techniques(team, position):
             for target in tech.targets.to_action_target():
                 actions.add(
-                    cls(selected_target=target, detail=tech),
+                    cls(selected_target=target, technique=tech),
                     team,
                     position
                 )
@@ -232,6 +245,12 @@ class UseTechniqueAction(Action):
         return actions
 
 class SwitchTemAction(Action):
+    def __init__(self,
+        tem_in: Tem
+    ):
+        super().__init__(ActionTarget.SELF)
+        self.__tem_in = tem_in
+
     @classmethod
     def get_possible_actions(cls,
         team: Teams,
@@ -242,7 +261,7 @@ class SwitchTemAction(Action):
 
         for temtem in state.get_bench(team):
             actions.add(
-                cls(selected_target=ActionTarget.SELF, detail=temtem),
+                cls(tem_in=temtem),
                 team,
                 position
             )
@@ -251,7 +270,7 @@ class SwitchTemAction(Action):
 
     @property
     def in_tem(self) -> Tem:
-        raise NotImplementedError
+        return self.__tem_in
 
     def is_compatible(self,
         self_position: TeamBattlePosition,
@@ -286,7 +305,21 @@ class RestAction(Action):
 
         return actions
 
+    def is_compatible(self,
+        self_position: TeamBattlePosition,
+        other: Action,
+        other_position: TeamBattlePosition
+    ) -> bool:
+        """
+        Resting is compatible to every action
+        """
+        return self_position != other_position
+
 class UseItemAction(Action):
+    def __init__(self, selected_target: ActionTarget, item: Item):
+        super().__init__(selected_target)
+        self.__item = item
+
     @classmethod
     def get_possible_actions(cls,
         team: Teams,
@@ -298,7 +331,7 @@ class UseItemAction(Action):
         for item in state.get_items(team):
             for target in item.possible_targets:
                 actions.add(
-                    cls(selected_target=target, detail=item),
+                    cls(selected_target=target, item=item),
                     team,
                     position
                 )
@@ -306,6 +339,9 @@ class UseItemAction(Action):
         return actions
 
 class RunAction(Action):
+    def __init__(self):
+        super().__init__(ActionTarget.OWN_TEAM)
+
     @classmethod
     def get_possible_actions(cls,
         team: Teams,
