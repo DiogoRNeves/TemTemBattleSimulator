@@ -244,6 +244,16 @@ class UseTechniqueAction(Action):
 
         return actions
 
+    def is_compatible(self,
+        self_position: TeamBattlePosition,
+        other: Action,
+        other_position: TeamBattlePosition
+    ) -> bool:
+        """
+        Using a Technique is compatible to every action
+        """
+        return self_position != other_position
+
 class SwitchTemAction(Action):
     def __init__(self,
         tem_in: Tem
