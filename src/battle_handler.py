@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from queue import PriorityQueue
 from typing import Iterable, Optional, Type
-from asyncio import Task, TaskGroup, run
+from asyncio import Task, TaskGroup
 
 from src.battle_agent import BattleAgent
 from src.battle_state import (
