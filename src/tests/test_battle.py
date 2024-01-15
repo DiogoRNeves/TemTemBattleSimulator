@@ -1,5 +1,4 @@
 from hypothesis import event, given, strategies as st
-import pytest
 from src.battle_agent import BattleAgent, RandomBattleAgent
 from src.battle_team import Teams
 from src.battle import Battle
@@ -10,8 +9,7 @@ from src.team import PlaythroughTeam
 @given(
     seed=st.random_module()
 )
-@pytest.mark.asyncio
-async def test_random_action_battle_ends(seed):
+def test_random_action_battle_ends(seed):
     event(seed)
     s = BattleState(
         team_orange=PlaythroughTeam.get_random(),
@@ -29,5 +27,5 @@ async def test_random_action_battle_ends(seed):
     }
 
     # this one throws a lot of NotImplementedException at the moment :-)
-    result: BattleResult = await b.run(p)
+    result: BattleResult = b.run(p)
     assert not result is None

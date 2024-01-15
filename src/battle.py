@@ -13,11 +13,11 @@ class Battle():
     def state(self) -> BattleState:
         return self.__state
 
-    async def run(self, players: dict[Teams, BattleAgent]) -> BattleResult:
+    def run(self, players: dict[Teams, BattleAgent]) -> BattleResult:
         if self.state.phase[0] == BattlePhase.NOT_STARTED:
             self.state.next_phase()
 
         while not self.state.is_over:
-            await self.__handler.next(self.state, players)
+            self.__handler.next(self.state, players)
 
         return self.state.result

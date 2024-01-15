@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+import asyncio
 from queue import PriorityQueue
 from typing import Iterable, Optional, Type
 from asyncio import Task, TaskGroup
@@ -141,14 +142,15 @@ class BattleHandler(ABC):
         return isinstance(team, self.__team_class)
 
     def team_has_actions(self, team: Teams) -> bool:
-        return not self._possible_actions is None and self._possible_actions.team_has_actions(team)
+        return (not self._possible_actions is None) and \
+            self._possible_actions.team_has_actions(team)
 
-    async def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
+    def next(self, state: BattleState, players: dict[Teams, BattleAgent]):
         assert len(players) == len(Teams), \
             f"teams and players must be the same size: {len(players)} players, {len(Teams)} teams"
 
         if not state.is_actions_selected:
-            actions = await self.__ask_for_actions(state, players)
+            actions = asyncio.run(self.__ask_for_actions(state, players))
             for team_action, team in actions:
                 state.select_action(team_action, team)
         self.__process_actions(state)
@@ -174,7 +176,8 @@ class BattleHandler(ABC):
 
     def _generate_possible_actions(self, state: BattleState):
         actions: ActionCollection = ActionCollection()
-        for action_type in self.__allowed_actions:
+        alllowed = self._allowed_actions
+        for action_type in alllowed:
             for team, position in state.positions:
                 actions_for_type: ActionCollection = \
                     action_type.get_possible_actions(
@@ -182,10 +185,8 @@ class BattleHandler(ABC):
                         position,
                         state
                     )
-
-                if actions_for_type.has_actions():
-                    actions.union(actions_for_type)
-
+                for team_, position_, action in actions_for_type:
+                    actions.add(action, team_, position_)
 
         self._possible_actions = TurnActionCollection(actions)
 
