@@ -468,7 +468,7 @@ class ActionCollection():
             for p  in positions:
                 actions = self.__actions[t][p]
                 if any(actions):
-                    res.union(actions)
+                    res = res.union(actions)
 
         return res
 
