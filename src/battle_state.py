@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import auto
 from itertools import product
-from typing import Iterable, Iterator, Optional, Self, Tuple
+from typing import Generator, Iterable, Iterator, Optional, Self, Tuple
 from src.battle_team import TeamBattlePosition, Teams
 from src.team import Team
 from src.patterns.sequential_enum import SequentialEnum
@@ -31,7 +31,7 @@ class BattleResult():
 
 # TODO
 class SidedBattleState():
-    def __init__(self, side: Teams, possible_actions: list[TeamAction]):
+    def __init__(self, side: Teams, possible_actions: Iterable[TeamAction]):
         self.__side = side
         self.__possible_actions = possible_actions
 
@@ -40,7 +40,7 @@ class SidedBattleState():
         return self.__side
 
     @property
-    def possible_actions(self) -> list[TeamAction]:
+    def possible_actions(self) -> Iterable[TeamAction]:
         return self.__possible_actions
 
 class BattleField():
@@ -180,9 +180,6 @@ class BattleState():
 
     def team_has_temtem_in_position(self, team: Teams, position: TeamBattlePosition):
         # TODO implement a battlefield that takes care of the positions
-        raise NotImplementedError
-
-    def for_side(self, side: Teams) -> SidedBattleState:
         raise NotImplementedError
 
 
@@ -410,6 +407,9 @@ class TurnAction:
                 return False
         return True
 
+    def to_team_action(self, team: Teams) -> TeamAction:
+        return self.__team_actions[team]
+
     @property
     def actions(self) -> Iterator[RunnableAction]:
         for team_color, position, action in self:
@@ -496,35 +496,45 @@ class TurnActionCollection():
         return self.__actions.has_actions(team=team)
 
     def __iter__(self) -> Iterator[TurnAction]:
-        action_lists: Iterable[Iterable[Action]] = (
+        turn_action_lists: Generator[Iterable[TeamAction], None, None] = (
+            self.for_team(team) for team in Teams
+        )
+
+        possibilities = product(*turn_action_lists)
+
+        for possibility in possibilities:
+            turn_action_dict: dict[Teams, TeamAction] = {}
+
+            for team in Teams:
+                turn_action_dict[team] = possibility[team.value - 1] # auto() starts on 1
+
+            yield TurnAction(turn_action_dict)
+
+    def for_team(self, team: Teams) -> Iterable[TeamAction]:
+        # TODO we need to be more efficient. this is very slow
+        # lets first generate team actions, and them combine them all later
+        action_lists: Generator[Iterable[Action], None, None] = (
             self.__actions.get_actions(team, position)
-                for team in Teams
-                    for position in TeamBattlePosition
-                        if self.__actions.has_actions(team, position)
+                for position in TeamBattlePosition
+                    if self.__actions.has_actions(team, position)
         )
 
         possibilities = product(*action_lists)
 
         for possibility in possibilities:
-            turn_action: dict[Teams, TeamAction] = {}
             i: int = 0
-            are_actions_compatible: bool = True
-            for team in Teams:
-                team_action: dict[TeamBattlePosition,Action] = {}
-                for position in TeamBattlePosition:
-                    if self.__actions.has_actions(team, position):
-                        team_action[position] = possibility[i]
-                        i += 1
-                turn_action[team] = TeamAction(team_action)
-                are_actions_compatible = turn_action[team].are_actions_compatible
 
-                if not are_actions_compatible:
-                    break
-
+            team_action_dict: dict[TeamBattlePosition,Action] = {}
+            for position in TeamBattlePosition:
+                if self.__actions.has_actions(team, position):
+                    team_action_dict[position] = possibility[i]
                 i += 1
+            team_action = TeamAction(team_action_dict)
 
-            if are_actions_compatible:
-                yield TurnAction(turn_action)
+            if team_action.are_actions_compatible:
+                yield team_action
+            else:
+                break
 
 class RunnableAction():
     def __init__(self, action: Action, team: Teams, position: TeamBattlePosition) -> None:
