@@ -12,8 +12,8 @@ class BattleAgent(ABC):
 
 class FirstActionAvailableBattleAgent(BattleAgent):
     def choose_action(self, state: SidedBattleState) -> TeamAction:
-        return state.possible_actions[0]
+        return next(state.possible_actions.__iter__()) # pylint:disable=unnecessary-dunder-call
 
 class RandomBattleAgent(BattleAgent):
     def choose_action(self, state: SidedBattleState) -> TeamAction:
-        return random.choice(state.possible_actions)
+        return random.choice(list(state.possible_actions))

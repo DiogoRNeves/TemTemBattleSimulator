@@ -7,7 +7,8 @@ from asyncio import Task, TaskGroup
 
 from src.battle_agent import BattleAgent
 from src.battle_state import (
-    BattlePhase, BattleState, Action, ActionCollection, RunAction, UseItemAction, TeamAction,
+    BattlePhase, BattleState, Action, ActionCollection, RunAction,
+    SidedBattleState, UseItemAction, TeamAction,
     TurnActionCollection, RunnableAction
 )
 from src.battle_team import TeamBattlePosition, Teams
@@ -80,10 +81,10 @@ class BattleHandler(ABC):
     async def __ask_player_for_action(
             self,
             player: BattleAgent,
-            state: BattleState,
+            state: SidedBattleState,
             team: Teams
     ) -> tuple[TeamAction, Teams]:
-        return (player.choose_action(state.for_side(team)), team)
+        return (player.choose_action(state), team)
 
     async def __ask_for_actions(
             self,
@@ -95,10 +96,12 @@ class BattleHandler(ABC):
 
         async with TaskGroup() as tg:
             for team in Teams:
-                if self.team_has_actions(team) and (not state.is_team_action_selected(team)):
+                if not self._possible_actions is None and self.team_has_actions(team) \
+                        and (not state.is_team_action_selected(team)):
+                    sided = SidedBattleState(team, self._possible_actions.for_team(team))
                     tasks.append(
                         tg.create_task(
-                            self.__ask_player_for_action(players[team], state, team)
+                            self.__ask_player_for_action(players[team], sided, team)
                         )
                     )
 
