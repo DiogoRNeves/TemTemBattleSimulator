@@ -143,7 +143,7 @@ class BattleState():
                 yield tem
 
     def select_action(self, action: TeamAction, team: Teams):
-        raise NotImplementedError
+        self.__turn_action.add(team, action)
 
     def is_team_action_selected(self, team: Teams) -> bool:
         return self.__turn_action.has_team_action(team)
@@ -417,6 +417,9 @@ class TurnAction:
 
     def has_team_action(self, team: Teams) -> bool:
         return team in self.__team_actions
+
+    def add(self, team: Teams, team_action: TeamAction):
+        self.__team_actions[team] = team_action
 
     def __iter__(self) -> Iterator[tuple[Teams, TeamBattlePosition, Action]]:
         for team_color, team_action in self.__team_actions.items():
